@@ -16,6 +16,7 @@ function initSpaceshipShader() {
 
      // adresse de la variable uniforme uOffset dans le shader
     spaceshipShader.positionUniform = gl.getUniformLocation(spaceshipShader, "uPosition");
+    spaceshipShader.maTextureUniform = gl.getUniformLocation(spaceshipShader, "uMaTexture");
 
     console.log("spaceship shader initialized");
 }
@@ -47,12 +48,13 @@ function Spaceship() {
 	this.coordBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
 	var coords = [
-		 0.0, 0.0, 
-		 1.0, 0.0, 
-		 1.0, 1.0, 
-		 0.0, 1.0
+        0.4, 0.225,
+        0.5, 0.225,
+        0.5, 0.425,
+        0.4, 0.425
 	];
-
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
 	this.coordBuffer.itemSize = 2;
 	this.coordBuffer.numItems = 4;
@@ -75,6 +77,7 @@ Spaceship.prototype.initParameters = function() {
 
 Spaceship.prototype.setParameters = function(elapsed) {
 	// on pourrait animer des choses ici
+
 }
 
 Spaceship.prototype.setPosition = function(x,y) {
