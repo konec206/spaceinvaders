@@ -10,6 +10,8 @@
 <script type="text/javascript" src="background.js"></script>
 <script type="text/javascript" src="spaceship.js"></script>
 <script type="text/javascript" src="bullet.js"></script>
+<script type="text/javascript" src="ennemy.js"></script>
+
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
     // *** le vertex shader *** 
@@ -203,15 +205,54 @@ void main(void) {
 }
 </script>
 
+<script id="ennemy-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+    // projection de la position
+    gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+    // stockage de la coordonnee de texture
+    vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="ennemy-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
 <script type="text/javascript">
 
     var fbo; // le FBO utilisé pour rendre la texture de hauteur
     var heightfield; // l'objet heightfield, sa géométrie, son shader
     var background; // l'objet background, sa géométrie, son shader
+
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var spaceshipTexture;
+
     var bullet; // l'objet bullet, sa géométrie, son shader
     var bulletTexture;
+    var bullets = [];   // Liste des munitions
+
+    var ennemy; // Ennemi
+    var ennemyTexture;
+    var ennemies = [];
+
+    var bullet_contact_sound;
 
     function drawScene() {
         // initialisation du viewport
@@ -236,7 +277,10 @@ void main(void) {
         drawSpaceShip();
 
         // dessin des munitions du vaisseau
-        drawBullet();
+        drawBullets();
+
+        // dessin des ennemis
+        drawEnnemies();
     }
 
     function drawHeightfield(){
@@ -261,14 +305,44 @@ void main(void) {
         spaceship.draw();
     }
 
-    function drawBullet(){
+    function drawBullets(){
         gl.useProgram(bullet.shader());
         gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,bulletTexture); // on place maTexture dans l'unité active
+        gl.bindTexture(gl.TEXTURE_2D, bulletTexture); // on place maTexture dans l'unité active
         gl.uniform1i(bullet.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        bullet.sendUniformVariables();
-        bullet.draw();
+        for(var i=0; i<bullets.length; i++) {
+            bullets[i].sendUniformVariables();
+            bullets[i].draw();
+
+            // On évite que les munitions soient stockées à l'infini
+            if(i > 50){
+                bullets.shift();
+            }
+        }
+    }
+
+    function drawEnnemies(){
+        gl.useProgram(ennemy.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D, ennemyTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        for(var i=0; i<ennemies.length; i++) {
+            if(ennemies[i].isAlive() === false){
+                // ANIMATION DE MORT?
+                ennemies.splice(ennemies[i], 1);
+            }
+            else{
+                ennemies[i].sendUniformVariables();
+                ennemies[i].draw();
+
+                // On évite que les ennemies soient stockés à l'infini
+                if(i > 30){
+                    ennemies.shift();
+                }
+            }
+        }
     }
 
     // une bonne manière de gérer les évènements clavier
@@ -311,11 +385,27 @@ void main(void) {
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
 
-            // Calcul de la nouvelle position de bullet afin qu'elle avance
-            bullet.position[1] = bullet.position[1] + 0.03;
-            bullet.setParameters(elapsed);
+            // Calcul de la nouvelle position des munitions afin qu'elles avancent
+            animateBullets(elapsed);
+
+            // Calcul de la nouvelle position des ennemis afin qu'ils avancent
+            animateEnnemies(elapsed);
         }
         lastTime = timeNow;
+    }
+
+    function animateBullets(elapsed){
+        for(var i=0; i<bullets.length; i++){
+            bullets[i].setPosition(bullets[i].position[0], bullets[i].position[1] + 0.025);
+            bullets[i].setParameters(elapsed);
+        }
+    }
+
+    function animateEnnemies(elapsed){
+        for(var i=0; i<ennemies.length; i++){
+            ennemies[i].setPosition(ennemies[i].position[0], ennemies[i].position[1] - 0.01);
+            ennemies[i].setParameters(elapsed);
+        }
     }
 
     function tick() {
@@ -324,16 +414,63 @@ void main(void) {
         drawScene();
         animate();
         fire();
+        spawnEnnemy();
+
+        checkCollisions();
     }
 
-    var fireDelay = 70; // Compteur afin de gérer la fréquence des tirs
+    function checkCollisions(){
+        //----- On traite les collisions entre les projectiles et les ennemis -----//
+        // Pour chaque projectile
+        for(var i=0; i<bullets.length; i++){
+            var bulletX = bullets[i].position[0];
+            var bulletY = bullets[i].position[1];
+
+            // Pour chaque ennemi
+            for(var j=0; j<ennemies.length; j++){
+                var ennemyX = ennemies[j].position[0];
+                var ennemyY = ennemies[j].position[1];
+
+                // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
+                if(bulletX - ennemyX < 0.1 && bulletX - ennemyX > -0.1 && bulletY - ennemyY < 0.02 && bulletY - ennemyY > - 0.02){
+                    ennemies[j].setHp(ennemies[j].getHp() - 25);
+                    console.log("Ennemy lost HP ! Current HP : " + ennemies[j].getHp());
+
+                    // Le projectile est détruit
+                    bullets.splice(bullets[i], 1);
+
+                    bullet_contact_sound.play();
+                }
+            }
+        }
+
+    }
+
+    var fireDelay = 60; // Compteur afin de gérer la fréquence des tirs
     function fire() {
         if(fireDelay > 0) fireDelay--;
         else{
-            bullet.position[0] = spaceship.position[0];
-            bullet.position[1] = spaceship.position[1]+0.15;
-            console.log("firing");
-            fireDelay = 70;
+            bullet = new Bullet();
+            bullet.setPosition(spaceship.position[0], spaceship.position[1]+0.2);
+            bullets.push(bullet);
+            fireDelay = 20;
+        }
+    }
+
+
+    var ennemySpawnDelay = 220;
+    var randomX;
+    function spawnEnnemy(){
+        if(ennemySpawnDelay > 0) ennemySpawnDelay--;
+        else{
+            ennemy = new Ennemy();
+
+            // On génère une valeur aléatoire pour la position de départ de l'ennemi
+            randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)),1).toFixed(2));
+
+            ennemy.setPosition(randomX,1);
+            ennemies.push(ennemy);
+            ennemySpawnDelay = 80;
         }
     }
 
@@ -351,20 +488,26 @@ void main(void) {
         initBackgroundShader();
         initSpaceshipShader();
         initBulletShader();
+        initEnnemyShader();
+
+        // init de tous les sons
+        bullet_contact_sound = new Audio('bullet_contact.mp3');
 
         spaceshipTexture = initTexture("images/final_sprites.png");
         bulletTexture = initTexture("images/final_sprites.png");
+        ennemyTexture = initTexture("images/final_sprites.png");
 
-        // init de tous les objets
+        // init de tous les objets fixes
         heightfield = new Heightfield();
         background = new Background(fbo.texture(0));
         spaceship = new Spaceship();
         bullet = new Bullet();
+        ennemy = new Ennemy();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-        // active le teste de profondeur 
+        // active le test de profondeur
         gl.enable(gl.DEPTH_TEST);
 
         /* Mouse and keyboard interaction functions */
