@@ -216,7 +216,7 @@ void main(void) {
     }
 
     // une bonne manière de gerer les evenements claviers
-    // permet d'avoir plusieurs touches appuyées simultanémen
+    // permet d'avoir plusieurs touches appuyées simultanément
     var currentlyPressedKeys = {};
 
     function handleKeyDown(event) {
@@ -263,6 +263,11 @@ void main(void) {
         handleKeys();
         drawScene();
         animate();
+        fire();
+    }
+
+    function fire() {
+        console.log("firing");
     }
 
 
