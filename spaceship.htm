@@ -9,6 +9,7 @@
 <script type="text/javascript" src="heightfield.js"></script>
 <script type="text/javascript" src="background.js"></script>
 <script type="text/javascript" src="spaceship.js"></script>
+<script type="text/javascript" src="bullet.js"></script>
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
     // *** le vertex shader *** 
@@ -25,7 +26,6 @@
         vTextureCoord = aVertexCoord;
     }
 </script>
-
 <script id="heightfield-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
@@ -96,7 +96,6 @@ void main(void) {
         vTextureCoord = aVertexCoord;
     }
 </script>
-
 <script id="background-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
@@ -174,6 +173,36 @@ void main(void) {
 }
 </script>
 
+<script id="bullet-vs" type="x-shader/x-vertex">
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+    uniform vec2 uPosition; // position de la munition
+    varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+    void main(void) {
+        // projection de la position
+        gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+        // stockage de la coordonnee de texture
+        vTextureCoord = aVertexCoord;
+    }
+</script>
+<script id="bullet-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
 <script type="text/javascript">
 
     var fbo; // le FBO utilisé pour rendre la texture de hauteur
@@ -181,6 +210,8 @@ void main(void) {
     var background; // l'objet background, sa géométrie, son shader
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var spaceshipTexture;
+    var bullet; // l'objet bullet, sa géométrie, son shader
+    var bulletTexture;
 
     function drawScene() {
         // initialisation du viewport
@@ -193,19 +224,34 @@ void main(void) {
         gl.bindFramebuffer(gl.FRAMEBUFFER,fbo.id());
 
         // dessin du heightfield
-        gl.useProgram(heightfield.shader());
-        heightfield.sendUniformVariables();
-        heightfield.draw();
+        drawHeightfield();
 
-        // desactivation du FBO (on dessine sur l'ecran maintenant)
+        // désactivation du FBO (on dessine sur l'ecran maintenant)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         // dessin du background (utilise la texture dessinée précédemment)
+        drawBackground();
+
+        // dessin du vaisseau (shader par défaut ici)
+        drawSpaceShip();
+
+        // dessin des munitions du vaisseau
+        drawBullet();
+    }
+
+    function drawHeightfield(){
+        gl.useProgram(heightfield.shader());
+        heightfield.sendUniformVariables();
+        heightfield.draw();
+    }
+
+    function drawBackground(){
         gl.useProgram(background.shader());
         background.sendUniformVariables();
         background.draw();
+    }
 
-        // dessin du vaisseau (shader par defaut ici)
+    function drawSpaceShip(){
         gl.useProgram(spaceship.shader());
         gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
         gl.bindTexture(gl.TEXTURE_2D,spaceshipTexture); // on place maTexture dans l'unité active
@@ -215,7 +261,17 @@ void main(void) {
         spaceship.draw();
     }
 
-    // une bonne manière de gerer les evenements claviers
+    function drawBullet(){
+        gl.useProgram(bullet.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,bulletTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(bullet.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        bullet.sendUniformVariables();
+        bullet.draw();
+    }
+
+    // une bonne manière de gérer les évènements clavier
     // permet d'avoir plusieurs touches appuyées simultanément
     var currentlyPressedKeys = {};
 
@@ -236,7 +292,7 @@ void main(void) {
     }
 
     function mouseMove(event) {
-        // controle de la position du vaisseau en fonction de la souris
+        // contrôle de la position du vaisseau en fonction de la souris
         // la position est remappée entre -1 et 1 pour cela
         var newx = 2.0*(event.clientX/gl.viewportWidth)-1.0;
         var newy = -(2.0*(event.clientY/gl.viewportHeight)-1.0);
@@ -248,12 +304,16 @@ void main(void) {
     var lastTime = 0;
     function animate() {
         var timeNow = new Date().getTime();
-        if (lastTime != 0) {
+        if (lastTime !== 0) {
             // chaque objet est susceptible de s'animer
             var elapsed = timeNow - lastTime;
             heightfield.setParameters(elapsed);
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
+
+            // Calcul de la nouvelle position de bullet afin qu'elle avance
+            bullet.position[1] = bullet.position[1] + 0.03;
+            bullet.setParameters(elapsed);
         }
         lastTime = timeNow;
     }
@@ -266,8 +326,15 @@ void main(void) {
         fire();
     }
 
+    var fireDelay = 70; // Compteur afin de gérer la fréquence des tirs
     function fire() {
-        console.log("firing");
+        if(fireDelay > 0) fireDelay--;
+        else{
+            bullet.position[0] = spaceship.position[0];
+            bullet.position[1] = spaceship.position[1]+0.15;
+            console.log("firing");
+            fireDelay = 70;
+        }
     }
 
 
@@ -283,13 +350,16 @@ void main(void) {
         initHeightfieldShader();
         initBackgroundShader();
         initSpaceshipShader();
+        initBulletShader();
 
         spaceshipTexture = initTexture("images/final_sprites.png");
+        bulletTexture = initTexture("images/final_sprites.png");
 
         // init de tous les objets
         heightfield = new Heightfield();
         background = new Background(fbo.texture(0));
         spaceship = new Spaceship();
+        bullet = new Bullet();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
