@@ -12,12 +12,13 @@
 <script type="text/javascript" src="bullet.js"></script>
 <script type="text/javascript" src="ennemy.js"></script>
 <script type="text/javascript" src="game.js"></script>
+<script type="text/javascript" src="pause.js"></script>
 
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
 
@@ -51,12 +52,12 @@ float vnoise(in vec2 p) {
     // pris sur shadertoy
     vec2 i = floor(p);
     vec2 f = fract(p);
-    
+
     vec2 u = f*f*(3.0-2.0*f);
 
-    return mix( mix( hash( i + vec2(0.0,0.0) ), 
+    return mix( mix( hash( i + vec2(0.0,0.0) ),
                      hash( i + vec2(1.0,0.0) ), u.x),
-                mix( hash( i + vec2(0.0,1.0) ), 
+                mix( hash( i + vec2(0.0,1.0) ),
                      hash( i + vec2(1.0,1.0) ), u.x), u.y);
 }
 
@@ -85,9 +86,9 @@ void main(void) {
 </script>
 
 <script id="background-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
 
@@ -130,7 +131,7 @@ vec3 computeNormal() {
     float gx = 0.5*(xp-xm)*scale;
     float gy = 0.5*(yp-ym)*scale;
 
-    vec3 v1 = normalize(vec3(1.0,0.0,gx));  
+    vec3 v1 = normalize(vec3(1.0,0.0,gx));
     vec3 v2 = normalize(vec3(0.0,1.0,gy));
 
     return cross(v1,v2);
@@ -146,9 +147,9 @@ void main(void) {
 </script>
 
 <script id="spaceship-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     uniform vec2 uPosition; // position du vaisseau
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
@@ -236,6 +237,36 @@ void main(void) {
 }
 </script>
 
+<script id="pause-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="pause-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
 <script type="text/javascript">
 
     var fbo; // le FBO utilisé pour rendre la texture de hauteur
@@ -243,6 +274,8 @@ void main(void) {
     var background; // l'objet background, sa géométrie, son shader
 
     var game; // Données et fonctions de la partie
+    var pause;
+    var pauseTexture;
 
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var spaceshipTexture;
@@ -267,23 +300,39 @@ void main(void) {
         // active le FBO (a partie de la, on dessine dans la texture associée)
         gl.bindFramebuffer(gl.FRAMEBUFFER,fbo.id());
 
-        // dessin du heightfield
-        drawHeightfield();
+        if(game.isPaused()){
+            // On affiche l'image de pause
+            drawPause();
+        }
+        else{
+            // dessin du heightfield
+            drawHeightfield();
 
-        // désactivation du FBO (on dessine sur l'ecran maintenant)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            // désactivation du FBO (on dessine sur l'ecran maintenant)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        // dessin du background (utilise la texture dessinée précédemment)
-        drawBackground();
+            // dessin du background (utilise la texture dessinée précédemment)
+            drawBackground();
 
-        // dessin du vaisseau (shader par défaut ici)
-        drawSpaceShip();
+            // dessin du vaisseau (shader par défaut ici)
+            drawSpaceShip();
 
-        // dessin des munitions du vaisseau
-        drawBullets();
+            // dessin des munitions du vaisseau
+            drawBullets();
 
-        // dessin des ennemis
-        drawEnnemies();
+            // dessin des ennemis
+            drawEnnemies();
+        }
+    }
+
+    function drawPause(){
+        gl.useProgram(pause.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,pauseTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(pause.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        pause.sendUniformVariables();
+        pause.draw();
     }
 
     function drawHeightfield(){
@@ -400,7 +449,7 @@ void main(void) {
     }
 
 
-    // animation 
+    // animation
     var lastTime = 0;
     function animate() {
         var timeNow = new Date().getTime();
@@ -435,7 +484,8 @@ void main(void) {
     }
 
     function tick() {
-        if(checkGameStatus()){ // Vérification des stats du vaisseau et de la partie
+        var gameStatus = checkGameStatus();
+        if(gameStatus === "Normal") { // Vérification des stats du vaisseau et de la partie
             requestAnimFrame(tick);
             handleKeys();
             drawScene();
@@ -443,25 +493,30 @@ void main(void) {
             fire();
             spawnEnnemy();
             checkCollisions();
-        } else{
+        } else if(gameStatus === "Ended"){
+
+        } else if(gameStatus === "Paused"){
             requestAnimFrame(tick);
             handleKeys();
         }
     }
 
     function checkGameStatus(){
-        if(game.isPaused()){
-            return false;
-        }
-        if(spaceship.getHp() <= 0){
-            game.end();
-        }
-
         // On met à jour l'affichage des stats dans la barre
         document.getElementById("stats_hp").innerText = spaceship.getHp();
         document.getElementById("stats_score").innerText = game.getScore();
 
-        return true;
+        if(game.isPaused()){
+            drawPause();
+            return "Paused";
+        }
+
+        if(spaceship.getHp() <= 0){
+            game.end();
+            return "Ended";
+        }
+
+        return "Normal";
     }
 
     function checkCollisions(){
@@ -554,6 +609,7 @@ void main(void) {
         initSpaceshipShader();
         initBulletShader();
         initEnnemyShader();
+        initPauseShader();
 
         // init de tous les sons
         for(var i=0; i<10; i++){
@@ -564,6 +620,7 @@ void main(void) {
         spaceshipTexture = initTexture("images/final_sprites.png");
         bulletTexture = initTexture("images/final_sprites.png");
         ennemyTexture = initTexture("images/final_sprites.png");
+        pauseTexture = initTexture("images/Menu/Pause_message.png");
 
         // init de tous les objets fixes
         heightfield = new Heightfield();
@@ -572,6 +629,7 @@ void main(void) {
         bullet = new Bullet();
         ennemy = new Ennemy();
         game = new Game();
+        pause = new Pause();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -582,8 +640,8 @@ void main(void) {
         /* Mouse and keyboard interaction functions */
         //canvas.addEventListener('mousedown', tbMouseDown, true);
         canvas.addEventListener('mousemove', mouseMove, true);
-        //canvas.addEventListener('mouseup', tbMouseUp, true);    
-        
+        //canvas.addEventListener('mouseup', tbMouseUp, true);
+
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
 
