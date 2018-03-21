@@ -72,7 +72,12 @@ Ennemy.prototype.initParameters = function() {
     this.height = 0.2;
     this.position = [0.0,-0.7];
     this.hp = 100;
+    this.worth = 20; // Valeur de l'ennemi sur le score, lorsqu'il est tué
 };
+
+Ennemy.prototype.getWorth = function(){
+    return this.worth;
+}
 
 Ennemy.prototype.setParameters = function(elapsed) {
     // on pourrait animer des choses ici

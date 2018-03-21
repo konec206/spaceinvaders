@@ -11,6 +11,7 @@
 <script type="text/javascript" src="spaceship.js"></script>
 <script type="text/javascript" src="bullet.js"></script>
 <script type="text/javascript" src="ennemy.js"></script>
+<script type="text/javascript" src="game.js"></script>
 
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
@@ -241,6 +242,8 @@ void main(void) {
     var heightfield; // l'objet heightfield, sa géométrie, son shader
     var background; // l'objet background, sa géométrie, son shader
 
+    var game; // Données et fonctions de la partie
+
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var spaceshipTexture;
 
@@ -252,7 +255,7 @@ void main(void) {
     var ennemyTexture;
     var ennemies = [];
 
-    var bullet_contact_sound;
+    var bullet_contact_sounds = [];
 
     function drawScene() {
         // initialisation du viewport
@@ -329,9 +332,23 @@ void main(void) {
         gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
         for(var i=0; i<ennemies.length; i++) {
-            if(ennemies[i].isAlive() === false){
+            if(ennemies[i].getHp() <= 0){
                 // ANIMATION DE MORT?
-                ennemies.splice(ennemies[i], 1);
+
+                this.game.addScore(ennemies[i].getWorth()); // On ajoute des points au score
+                ennemies.splice(ennemies.indexOf(ennemies[i]), 1);
+
+                // On joue un son d'explosion
+                var sound_played = false;
+                var a=0;
+                while(sound_played === false && a<bullet_contact_sounds.length){
+                    if(bullet_contact_sounds[a].currentTime === 0){
+                        bullet_contact_sounds[a].play();
+                        sound_played = true;
+                    }
+                    else bullet_contact_sounds[a].load();
+                    a++;
+                }
             }
             else{
                 ennemies[i].sendUniformVariables();
@@ -358,10 +375,19 @@ void main(void) {
         currentlyPressedKeys[event.keyCode] = false;
     }
 
+    function wait(ms){
+        var start = new Date().getTime();
+        var end = start;
+        while(end < start + ms) {
+            end = new Date().getTime();
+        }
+    }
+
     function handleKeys() {
-        if (currentlyPressedKeys[33]) {
-            // Page Up (par exemple)
-            // faire quelque chose... 
+        if (currentlyPressedKeys[80]) {
+            // Touche p
+            this.game.pause();
+            wait(300);  //On évite que l'action se déclenche plusieurs fois
         }
     }
 
@@ -409,18 +435,37 @@ void main(void) {
     }
 
     function tick() {
-        requestAnimFrame(tick);
-        handleKeys();
-        drawScene();
-        animate();
-        fire();
-        spawnEnnemy();
+        if(checkGameStatus()){ // Vérification des stats du vaisseau et de la partie
+            requestAnimFrame(tick);
+            handleKeys();
+            drawScene();
+            animate();
+            fire();
+            spawnEnnemy();
+            checkCollisions();
+        } else{
+            requestAnimFrame(tick);
+            handleKeys();
+        }
+    }
 
-        checkCollisions();
+    function checkGameStatus(){
+        if(game.isPaused()){
+            return false;
+        }
+        if(spaceship.getHp() <= 0){
+            game.end();
+        }
+
+        // On met à jour l'affichage des stats dans la barre
+        document.getElementById("stats_hp").innerText = spaceship.getHp();
+        document.getElementById("stats_score").innerText = game.getScore();
+
+        return true;
     }
 
     function checkCollisions(){
-        //----- On traite les collisions entre les projectiles et les ennemis -----//
+    //----- On traite les collisions entre les projectiles et les ennemis -----//
         // Pour chaque projectile
         for(var i=0; i<bullets.length; i++){
             var bulletX = bullets[i].position[0];
@@ -432,45 +477,65 @@ void main(void) {
                 var ennemyY = ennemies[j].position[1];
 
                 // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
-                if(bulletX - ennemyX < 0.1 && bulletX - ennemyX > -0.1 && bulletY - ennemyY < 0.02 && bulletY - ennemyY > - 0.02){
-                    ennemies[j].setHp(ennemies[j].getHp() - 25);
-                    console.log("Ennemy lost HP ! Current HP : " + ennemies[j].getHp());
+                if(bulletX - ennemyX < 0.15 && bulletX - ennemyX > -0.15 && bulletY - ennemyY < 0.1 && bulletY - ennemyY > - 0.1){
+                    // L'ennemi perd de la vie
+                    ennemies[j].setHp(ennemies[j].getHp() - spaceship.getDamages());
 
                     // Le projectile est détruit
-                    bullets.splice(bullets[i], 1);
-
-                    bullet_contact_sound.play();
+                    bullets.splice(bullets.indexOf(bullets[i]), 1);
                 }
             }
         }
 
+    //----- On traite les collisions entre les ennemis et le vaisseau -----//
+        var spaceshipX = spaceship.position[0];
+        var spaceshipY = spaceship.position[1];
+
+        // Pour chaque ennemi
+        for(var k=0; k<ennemies.length; k++){
+            ennemyX = ennemies[k].position[0];
+            ennemyY = ennemies[k].position[1];
+
+            // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
+            if(spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > - 0.1){
+                // Le vaisseau perd de la vie
+                spaceship.setHp(spaceship.getHp() - 1);
+
+                // L'ennemi est détruit
+                ennemies.splice(ennemies.indexOf(ennemies[k]), 1);
+            }
+        }
     }
 
-    var fireDelay = 60; // Compteur afin de gérer la fréquence des tirs
+    var fireDelay = 225; // Compteur afin de gérer la fréquence des tirs
     function fire() {
         if(fireDelay > 0) fireDelay--;
         else{
             bullet = new Bullet();
             bullet.setPosition(spaceship.position[0], spaceship.position[1]+0.2);
             bullets.push(bullet);
-            fireDelay = 20;
+            fireDelay = 12;
         }
     }
 
 
-    var ennemySpawnDelay = 220;
+    var ennemySpawnDelay = 200;
     var randomX;
+    var nbSpawnedEnnemies = 0;
     function spawnEnnemy(){
         if(ennemySpawnDelay > 0) ennemySpawnDelay--;
         else{
             ennemy = new Ennemy();
+            nbSpawnedEnnemies++;
 
             // On génère une valeur aléatoire pour la position de départ de l'ennemi
             randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)),1).toFixed(2));
 
             ennemy.setPosition(randomX,1);
             ennemies.push(ennemy);
-            ennemySpawnDelay = 80;
+
+            ennemySpawnDelay = ennemySpawnDelay = 50-(nbSpawnedEnnemies*0.15);
+            if(ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
         }
     }
 
@@ -491,7 +556,10 @@ void main(void) {
         initEnnemyShader();
 
         // init de tous les sons
-        bullet_contact_sound = new Audio('bullet_contact.mp3');
+        for(var i=0; i<10; i++){
+            bullet_contact_sounds.push(new Audio('sounds/bullet_contact.mp3'));
+            bullet_contact_sounds[i].volume = 0.2;
+        }
 
         spaceshipTexture = initTexture("images/final_sprites.png");
         bulletTexture = initTexture("images/final_sprites.png");
@@ -503,6 +571,7 @@ void main(void) {
         spaceship = new Spaceship();
         bullet = new Bullet();
         ennemy = new Ennemy();
+        game = new Game();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -531,4 +600,8 @@ void main(void) {
 
 <body onload="webGLStart();">
     <canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
+    <div id="statsBar" style="background-color: skyblue; width: 780px; height:25px; text-align: right; padding: 0 10px;">
+        Score : <span id="stats_score">0</span> |
+        HP : <span id="stats_hp">5</span>
+    </div>
 </body></html>
