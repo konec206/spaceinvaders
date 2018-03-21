@@ -22,7 +22,7 @@ Game.prototype.getScore = function() {
 
 Game.prototype.pause = function(){
     this.paused = !this.paused;
-    drawPause();
+    drawMenu();
 };
 
 Game.prototype.isPaused = function(){

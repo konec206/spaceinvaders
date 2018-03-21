@@ -1,27 +1,25 @@
-var pauseShader;
+var menuShader;
 
-function initPauseShader() {
-    pauseShader = initShaders("pause-vs","pause-fs");
+function initMenuShader() {
+    menuShader = initShaders("menu-vs","menu-fs");
 
     // active ce shader
-    gl.useProgram(pauseShader);
+    gl.useProgram(menuShader);
 
-    // récupère la localisation de l'attribut dans lequel on souhaite accéder aux positions
-    pauseShader.vertexPositionAttribute = gl.getAttribLocation(pauseShader, "aVertexPosition");
-    gl.enableVertexAttribArray(pauseShader.vertexPositionAttribute); // active cet attribut
+    // recupere la localisation de l'attribut dans lequel on souhaite accéder aux positions
+    menuShader.vertexPositionAttribute = gl.getAttribLocation(menuShader, "aVertexPosition");
+    gl.enableVertexAttribArray(menuShader.vertexPositionAttribute); // active cet attribut
 
     // pareil pour les coordonnées de texture
-    pauseShader.vertexCoordAttribute = gl.getAttribLocation(pauseShader, "aVertexCoord");
-    gl.enableVertexAttribArray(pauseShader.vertexCoordAttribute);
+    menuShader.vertexCoordAttribute = gl.getAttribLocation(menuShader, "aVertexCoord");
+    gl.enableVertexAttribArray(menuShader.vertexCoordAttribute);
 
     // adresse de la variable uniforme uOffset dans le shader
-    pauseShader.positionUniform = gl.getUniformLocation(pauseShader, "uPosition");
-    pauseShader.maTextureUniform = gl.getUniformLocation(pauseShader, "uMaTexture");
-
-    console.log("pause shader initialized");
+    menuShader.positionUniform = gl.getUniformLocation(menuShader, "uPosition");
+    menuShader.maTextureUniform = gl.getUniformLocation(menuShader, "uMaTexture");
 }
 
-function Pause() {
+function Menu() {
     this.initParameters();
 
     // cree un nouveau buffer sur le GPU et l'active
@@ -48,10 +46,10 @@ function Pause() {
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-        0, 0,
-        1, 0,
-        1, 1,
-        0, 1
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
     ];
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -67,37 +65,50 @@ function Pause() {
     this.triangles.numItems = 6;
 }
 
-Pause.prototype.initParameters = function() {
-    this.width = 1;
-    this.height = 1;
-    this.position = [0.0,-0.7];
+Menu.prototype.initParameters = function() {
+    this.width = 1.4;
+    this.height = 1.4;
+    this.position = [0.0,-0.0];
+    this.cursor = null;
 };
 
+Menu.prototype.setParameters = function(elapsed) {
+    // on pourrait animer des choses ici
 
-Pause.prototype.setPosition = function(x,y) {
+};
+
+Menu.prototype.setPosition = function(x,y) {
     this.position = [x,y];
 };
 
-Pause.prototype.shader = function() {
-    return pauseShader;
+Menu.prototype.shader = function() {
+    return menuShader;
 };
 
-Pause.prototype.sendUniformVariables = function() {
-    gl.uniform2fv(pauseShader.positionUniform,this.position);
+Menu.prototype.setCursor = function(cursor) {
+    this.cursor = cursor;
 };
 
-Pause.prototype.draw = function() {
+Menu.prototype.getCursor = function() {
+    return this.cursor;
+}
+
+Menu.prototype.sendUniformVariables = function() {
+    gl.uniform2fv(menuShader.positionUniform,this.position);
+};
+
+Menu.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.vertexAttribPointer(pauseShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(menuShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // active le buffer de coords
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
-    gl.vertexAttribPointer(pauseShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(menuShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // dessine les buffers actifs
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triangles);
     gl.drawElements(gl.TRIANGLES, this.triangles.numItems, gl.UNSIGNED_SHORT, 0);
-};
+}
 
 

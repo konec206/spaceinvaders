@@ -19,8 +19,6 @@ function initHeightfieldShader() {
     heightfieldShader.amplitudeUniform = gl.getUniformLocation(heightfieldShader, "uAmplitude");
     heightfieldShader.frequencyUniform = gl.getUniformLocation(heightfieldShader, "uFrequency");
     heightfieldShader.persistenceUniform = gl.getUniformLocation(heightfieldShader, "uPersistence");
-
-    console.log("heightfield shader initialized");
 }
 
 function Heightfield() {
@@ -63,7 +61,6 @@ function Heightfield() {
 	var tri = [0,1,2,0,2,3];
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tri), gl.STATIC_DRAW);
     this.triangles.numItems = 6;
-    console.log("heightfield initialized");
 }
 
 Heightfield.prototype.initParameters = function() {

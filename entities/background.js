@@ -17,8 +17,6 @@ function initBackgroundShader() {
      // adresse de la texture uHeightfield dans le shader
     backgroundShader.heightfieldUniform = gl.getUniformLocation(backgroundShader, "uHeightfield");
     backgroundShader.textureSizeUniform = gl.getUniformLocation(backgroundShader, "uTextureSize");
-
-    console.log("background shader initialized");
 }
 
 function Background(heightfieldTexture) {
@@ -61,8 +59,6 @@ function Background(heightfieldTexture) {
 	var tri = [0,1,2,0,2,3];
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tri), gl.STATIC_DRAW);
     this.triangles.numItems = 6;
-
-    console.log("background initialized");
 }
 
 Background.prototype.shader = function() {
