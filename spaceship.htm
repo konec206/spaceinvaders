@@ -376,7 +376,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
         var ennemy; // Ennemi
         var ennemyTexture;
-        var ennemies = [];
+        var green_ennemies = [];
 
 
         //----- SOUNDS -----//
@@ -516,12 +516,12 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             gl.bindTexture(gl.TEXTURE_2D, ennemyTexture); // on place maTexture dans l'unité active
             gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-            for (var i = 0; i < ennemies.length; i++) {
-                if (ennemies[i].getHp() <= 0) {
+            for (var i = 0; i < green_ennemies.length; i++) {
+                if (green_ennemies[i].getHp() <= 0) {
                     // ANIMATION DE MORT?
 
-                    this.game.addScore(ennemies[i].getWorth()); // On ajoute des points au score
-                    ennemies.splice(ennemies.indexOf(ennemies[i]), 1);
+                    this.game.addScore(green_ennemies[i].getWorth()); // On ajoute des points au score
+                    green_ennemies.splice(green_ennemies.indexOf(green_ennemies[i]), 1);
 
                     // On joue un son d'explosion
                     var sound_played = false;
@@ -536,12 +536,12 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     }
                 }
                 else {
-                    ennemies[i].sendUniformVariables();
-                    ennemies[i].draw();
+                    green_ennemies[i].sendUniformVariables();
+                    green_ennemies[i].draw();
 
-                    // On évite que les ennemies soient stockés à l'infini
+                    // On évite que les green_ennemies soient stockés à l'infini
                     if (i > 30) {
-                        ennemies.shift();
+                        green_ennemies.shift();
                     }
                 }
             }
@@ -721,9 +721,38 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         }
 
         function animateEnnemies(elapsed) {
-            for (var i = 0; i < ennemies.length; i++) {
-                ennemies[i].setPosition(ennemies[i].position[0], ennemies[i].position[1] - 0.01);
-                ennemies[i].setParameters(elapsed);
+            // Ennemis verts, déplacements en zig-zag
+            for (var i = 0; i < green_ennemies.length; i++) {
+                var x = green_ennemies[i].position[0];
+                var newX = x;
+                var max_diff = 0.4;
+                var direction = green_ennemies[i].getDirection(); // 0 : gauche, 1 : droite
+                var diff_x;
+
+                if(direction === 0){
+                    diff_x = green_ennemies[i].getInitialPosition()[0] - x;
+
+                    if(x > -0.9 && diff_x < max_diff && diff_x > -max_diff){
+                        newX = x - 0.01;
+                    }
+                    else{
+                        green_ennemies[i].setInitialPosition(x, green_ennemies[i].position[1] - 0.01);
+                        green_ennemies[i].setDirection(1);
+                    }
+                }
+                else{
+                    diff_x = x - green_ennemies[i].getInitialPosition()[0];
+                    if(x < 0.9 && diff_x < max_diff && diff_x > -max_diff){
+                        newX = x + 0.01;
+                    }
+                    else{
+                        green_ennemies[i].setInitialPosition(x, green_ennemies[i].position[1] - 0.01);
+                        green_ennemies[i].setDirection(0);
+                    }
+                }
+
+                green_ennemies[i].setPosition(newX, green_ennemies[i].position[1] - 0.01);
+                green_ennemies[i].setParameters(elapsed);
             }
         }
 
@@ -770,14 +799,14 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 var bulletY = bullets[i].position[1];
 
                 // Pour chaque ennemi
-                for (var j = 0; j < ennemies.length; j++) {
-                    var ennemyX = ennemies[j].position[0];
-                    var ennemyY = ennemies[j].position[1];
+                for (var j = 0; j < green_ennemies.length; j++) {
+                    var ennemyX = green_ennemies[j].position[0];
+                    var ennemyY = green_ennemies[j].position[1];
 
                     // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
                     if (bulletX - ennemyX < 0.15 && bulletX - ennemyX > -0.15 && bulletY - ennemyY < 0.1 && bulletY - ennemyY > -0.1) {
                         // L'ennemi perd de la vie
-                        ennemies[j].setHp(ennemies[j].getHp() - spaceship.getDamages());
+                        green_ennemies[j].setHp(green_ennemies[j].getHp() - spaceship.getDamages());
 
                         // Le projectile est détruit
                         bullets.splice(bullets.indexOf(bullets[i]), 1);
@@ -790,9 +819,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             var spaceshipY = spaceship.position[1];
 
             // Pour chaque ennemi
-            for (var k = 0; k < ennemies.length; k++) {
-                ennemyX = ennemies[k].position[0];
-                ennemyY = ennemies[k].position[1];
+            for (var k = 0; k < green_ennemies.length; k++) {
+                ennemyX = green_ennemies[k].position[0];
+                ennemyY = green_ennemies[k].position[1];
 
                 // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
                 if (spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > -0.1) {
@@ -800,7 +829,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     spaceship.setHp(spaceship.getHp() - 1);
 
                     // L'ennemi est détruit
-                    ennemies.splice(ennemies.indexOf(ennemies[k]), 1);
+                    green_ennemies.splice(green_ennemies.indexOf(green_ennemies[k]), 1);
                 }
             }
         }
@@ -816,22 +845,21 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
-
         var ennemySpawnDelay = 200;
-        var randomX;
         var nbSpawnedEnnemies = 0;
-
         function spawnEnnemy() {
+            var randomX;
+
             if (ennemySpawnDelay > 0) ennemySpawnDelay--;
             else {
-                ennemy = new Ennemy();
+                ennemy = new Green_Ennemy();
                 nbSpawnedEnnemies++;
 
                 // On génère une valeur aléatoire pour la position de départ de l'ennemi
                 randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)), 1).toFixed(2));
 
-                ennemy.setPosition(randomX, 1);
-                ennemies.push(ennemy);
+                ennemy.setInitialPosition(randomX, 0.9);
+                green_ennemies.push(ennemy);
 
                 ennemySpawnDelay = ennemySpawnDelay = 50 - (nbSpawnedEnnemies * 0.15);
                 if (ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
@@ -880,7 +908,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
             spaceship = new Spaceship();
             bullet = new Bullet();
-            ennemy = new Ennemy();
+            ennemy = new Green_Ennemy();
 
             game = new Game();
 
