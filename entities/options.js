@@ -1,25 +1,25 @@
-var menuShader;
+var optionsShader;
 
-function initMenuShader() {
-    menuShader = initShaders("menu-vs","menu-fs");
+function initOptionsShader() {
+    optionsShader = initShaders("options-vs","options-fs");
 
     // active ce shader
-    gl.useProgram(menuShader);
+    gl.useProgram(optionsShader);
 
     // recupere la localisation de l'attribut dans lequel on souhaite accéder aux positions
-    menuShader.vertexPositionAttribute = gl.getAttribLocation(menuShader, "aVertexPosition");
-    gl.enableVertexAttribArray(menuShader.vertexPositionAttribute); // active cet attribut
+    optionsShader.vertexPositionAttribute = gl.getAttribLocation(optionsShader, "aVertexPosition");
+    gl.enableVertexAttribArray(optionsShader.vertexPositionAttribute); // active cet attribut
 
     // pareil pour les coordonnées de texture
-    menuShader.vertexCoordAttribute = gl.getAttribLocation(menuShader, "aVertexCoord");
-    gl.enableVertexAttribArray(menuShader.vertexCoordAttribute);
+    optionsShader.vertexCoordAttribute = gl.getAttribLocation(optionsShader, "aVertexCoord");
+    gl.enableVertexAttribArray(optionsShader.vertexCoordAttribute);
 
     // adresse de la variable uniforme uOffset dans le shader
-    menuShader.positionUniform = gl.getUniformLocation(menuShader, "uPosition");
-    menuShader.maTextureUniform = gl.getUniformLocation(menuShader, "uMaTexture");
+    optionsShader.positionUniform = gl.getUniformLocation(optionsShader, "uPosition");
+    optionsShader.maTextureUniform = gl.getUniformLocation(optionsShader, "uMaTexture");
 }
 
-function Menu() {
+function Options() {
     this.initParameters();
 
     // cree un nouveau buffer sur le GPU et l'active
@@ -65,50 +65,48 @@ function Menu() {
     this.triangles.numItems = 6;
 }
 
-Menu.prototype.initParameters = function() {
-    this.width = 1.4;
-    this.height = 1.4;
+Options.prototype.initParameters = function() {
+    this.width = 1.9;
+    this.height = 1.9;
     this.position = [0.0,-0.0];
     this.cursor = null;
 };
 
-Menu.prototype.setParameters = function(elapsed) {
+Options.prototype.setParameters = function(elapsed) {
     // on pourrait animer des choses ici
 
 };
 
-Menu.prototype.setPosition = function(x,y) {
+Options.prototype.setPosition = function(x,y) {
     this.position = [x,y];
 };
 
-Menu.prototype.shader = function() {
-    return menuShader;
+Options.prototype.shader = function() {
+    return optionsShader;
 };
 
-Menu.prototype.setCursor = function(cursor) {
+Options.prototype.setCursor = function(cursor) {
     this.cursor = cursor;
 };
 
-Menu.prototype.getCursor = function() {
+Options.prototype.getCursor = function() {
     return this.cursor;
+}
+
+Options.prototype.sendUniformVariables = function() {
+    gl.uniform2fv(optionsShader.positionUniform,this.position);
 };
 
-Menu.prototype.sendUniformVariables = function() {
-    gl.uniform2fv(menuShader.positionUniform,this.position);
-};
-
-Menu.prototype.draw = function() {
+Options.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.vertexAttribPointer(menuShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(optionsShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // active le buffer de coords
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
-    gl.vertexAttribPointer(menuShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(optionsShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // dessine les buffers actifs
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triangles);
     gl.drawElements(gl.TRIANGLES, this.triangles.numItems, gl.UNSIGNED_SHORT, 0);
-}
-
-
+};

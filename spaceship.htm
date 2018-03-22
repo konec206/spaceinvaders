@@ -13,6 +13,7 @@
 <script type="text/javascript" src="entities/ennemy.js"></script>
 <script type="text/javascript" src="entities/game.js"></script>
 <script type="text/javascript" src="entities/menu.js"></script>
+<script type="text/javascript" src="entities/options.js"></script>
 <script type="text/javascript" src="entities/cursor.js"></script>
 
 
@@ -268,6 +269,36 @@ void main(void) {
 }
 </script>
 
+<script id="options-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="options-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+// couleur par défaut des munitions
+gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
 <script id="cursor-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
@@ -300,15 +331,24 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
 <script type="text/javascript">
 
+    //----- BACKGROUND -----//
     var fbo; // le FBO utilisé pour rendre la texture de hauteur
     var heightfield; // l'objet heightfield, sa géométrie, son shader
     var background; // l'objet background, sa géométrie, son shader
 
+
+    //----- MENU -----//
     var game; // Données et fonctions de la partie
-    var menu;
-    var menuTexture;
     var cursorTexture;
 
+    var menu;
+    var menuTexture;
+
+    var options;
+    var optionsTexture;
+
+
+    //----- ENTITÉS -----//
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var spaceshipTexture;
 
@@ -320,6 +360,8 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
     var ennemyTexture;
     var ennemies = [];
 
+
+    //----- SOUNDS -----//
     var bullet_contact_sounds = [];
 
     function drawScene() {
@@ -339,9 +381,16 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // dessin du background (utilise la texture dessinée précédemment)
             drawBackground();
 
-            // On affiche l'image du menu et le curseur
-            drawCursor();
-            drawMenu();
+            if(game.isOptions() === false){
+                // On affiche l'image du menu et le curseur
+                drawMenuCursor();
+                drawMenu();
+            }
+            else {
+                // On est dans les options
+                drawOptionsCursor();
+                drawOptions();
+            }
         }
         else{
             // dessin du heightfield
@@ -364,6 +413,26 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         }
     }
 
+    function drawOptions(){
+        gl.useProgram(options.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,optionsTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(options.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        options.sendUniformVariables();
+        options.draw();
+    }
+
+    function drawOptionsCursor(){
+        gl.useProgram(options.cursor.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(options.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        options.cursor.sendUniformVariables();
+        options.cursor.draw();
+    }
+
     function drawMenu(){
         gl.useProgram(menu.shader());
         gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
@@ -374,7 +443,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         menu.draw();
     }
 
-    function drawCursor(){
+    function drawMenuCursor(){
         gl.useProgram(menu.cursor.shader());
         gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
         gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
@@ -493,21 +562,41 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         // Contrôles du menu
         if(this.game.isPaused()){
 
-            if (currentlyPressedKeys[40]) {
-                // TOUCHE DU BAS
-                if(this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbEntries()){
-                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() + 1);
+            // Sélection d'une entrée du menu
+            if (currentlyPressedKeys[13]) {
+                var entry = this.menu.cursor.getPositionNumber();
+
+                // Resume
+                if(entry === 1) {
+                    this.game.pause();
+                }
+                // Options
+                else if(entry === 2) {
+                    // Activation des options
+                    this.game.options();
                     drawScene();
-                    wait(80); //On évite que l'action se déclenche plusieurs fois
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
+                }
+                else if(entry === 3){
+
                 }
             }
 
+            // Flèche du bas
+            if (currentlyPressedKeys[40]) {
+                if(this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbEntries()){
+                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() + 1);
+                    drawScene();
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
+                }
+            }
+
+            // Flèche du haut
             if (currentlyPressedKeys[38]) {
-                // TOUCHE DU HAUT
                 if(this.menu.cursor.getPositionNumber() > 1){
                     this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() - 1);
                     drawScene();
-                    wait(80); //On évite que l'action se déclenche plusieurs fois
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
                 }
             }
 
@@ -684,6 +773,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         initBulletShader();
         initEnnemyShader();
         initMenuShader();
+        initOptionsShader();
         initCursorShader();
 
         // init de tous les sons
@@ -699,6 +789,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
         // Menu
         menuTexture = initTexture("images/menu/menu.png");
+        optionsTexture = initTexture("images/menu/options.png");
         cursorTexture = initTexture("images/menu/cursor.png");
 
         // init de tous les objets fixes
@@ -713,6 +804,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
         menu = new Menu();
         menu.setCursor(new Cursor());
+
+        options = new Options();
+        options.setCursor(new Cursor());
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
