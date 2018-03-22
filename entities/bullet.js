@@ -46,10 +46,10 @@ function Bullet() {
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-        0.4, 0.1,
-        0.5, 0.1,
-        0.5, 0.225,
-        0.4, 0.225
+        0.405, 0.1,
+        0.505, 0.1,
+        0.505, 0.225,
+        0.405, 0.225
     ];
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

@@ -51,8 +51,10 @@ function Spaceship() {
         0.5, 0.425,
         0.4, 0.425
 	];
+
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
 	this.coordBuffer.itemSize = 2;
 	this.coordBuffer.numItems = 4;

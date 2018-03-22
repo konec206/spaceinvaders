@@ -46,10 +46,10 @@ function Ennemy() {
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-        0.52, 0.76,
-        0.63, 0.76,
-        0.63, 0.92,
-        0.52, 0.92
+        0.525, 0.76,
+        0.635, 0.76,
+        0.635, 0.92,
+        0.525, 0.92
     ];
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
