@@ -1,23 +1,24 @@
-<html><head>
-<title>SpaceShip</title>
-<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<html>
+<head>
+    <title>SpaceShip</title>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
 
-<script type="text/javascript" src="gl-matrix.js"></script>
-<script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="game-utils.js"></script>
-<script type="text/javascript" src="fbo.js"></script>
-<script type="text/javascript" src="entities/heightfield.js"></script>
-<script type="text/javascript" src="entities/background.js"></script>
-<script type="text/javascript" src="entities/spaceship.js"></script>
-<script type="text/javascript" src="entities/bullet.js"></script>
-<script type="text/javascript" src="entities/ennemy.js"></script>
-<script type="text/javascript" src="entities/game.js"></script>
-<script type="text/javascript" src="entities/menu.js"></script>
-<script type="text/javascript" src="entities/options.js"></script>
-<script type="text/javascript" src="entities/cursor.js"></script>
+    <script type="text/javascript" src="gl-matrix.js"></script>
+    <script type="text/javascript" src="webgl-utils.js"></script>
+    <script type="text/javascript" src="game-utils.js"></script>
+    <script type="text/javascript" src="fbo.js"></script>
+    <script type="text/javascript" src="entities/heightfield.js"></script>
+    <script type="text/javascript" src="entities/background.js"></script>
+    <script type="text/javascript" src="entities/spaceship.js"></script>
+    <script type="text/javascript" src="entities/bullet.js"></script>
+    <script type="text/javascript" src="entities/ennemy.js"></script>
+    <script type="text/javascript" src="entities/game.js"></script>
+    <script type="text/javascript" src="entities/menu.js"></script>
+    <script type="text/javascript" src="entities/options.js"></script>
+    <script type="text/javascript" src="entities/cursor.js"></script>
 
 
-<script id="heightfield-vs" type="x-shader/x-vertex">
+    <script id="heightfield-vs" type="x-shader/x-vertex">
     // *** le vertex shader ***
     attribute vec3 aVertexPosition; // la position du sommet
     attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -31,8 +32,9 @@
         // stockage de la coordonnee de texture
         vTextureCoord = aVertexCoord;
     }
-</script>
-<script id="heightfield-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="heightfield-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -85,9 +87,10 @@ void main(void) {
     gl_FragColor = vec4(vec3(n),1.0);
 
 }
-</script>
 
-<script id="background-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="background-vs" type="x-shader/x-vertex">
     // *** le vertex shader ***
     attribute vec3 aVertexPosition; // la position du sommet
     attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -101,8 +104,9 @@ void main(void) {
         // stockage de la coordonnee de texture
         vTextureCoord = aVertexCoord;
     }
-</script>
-<script id="background-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="background-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -146,9 +150,10 @@ void main(void) {
     gl_FragColor = vec4(s,1.0);
 
 }
-</script>
 
-<script id="spaceship-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="spaceship-vs" type="x-shader/x-vertex">
     // *** le vertex shader ***
     attribute vec3 aVertexPosition; // la position du sommet
     attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -163,8 +168,9 @@ void main(void) {
         // stockage de la coordonnee de texture
         vTextureCoord = aVertexCoord;
     }
-</script>
-<script id="spaceship-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="spaceship-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -177,9 +183,10 @@ void main(void) {
         gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
 }
-</script>
 
-<script id="bullet-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="bullet-vs" type="x-shader/x-vertex">
     // *** le vertex shader ***
     attribute vec3 aVertexPosition; // la position du sommet
     attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -194,8 +201,9 @@ void main(void) {
         // stockage de la coordonnee de texture
         vTextureCoord = aVertexCoord;
     }
-</script>
-<script id="bullet-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="bullet-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -207,9 +215,10 @@ void main(void) {
     // couleur par défaut des munitions
     gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
-</script>
 
-<script id="ennemy-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="ennemy-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
 attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -224,8 +233,9 @@ void main(void) {
     // stockage de la coordonnee de texture
     vTextureCoord = aVertexCoord;
 }
-</script>
-<script id="ennemy-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="ennemy-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -237,9 +247,10 @@ void main(void) {
     // couleur par défaut des munitions
     gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
-</script>
 
-<script id="menu-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="menu-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
 attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -254,8 +265,9 @@ gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
 // stockage de la coordonnee de texture
 vTextureCoord = aVertexCoord;
 }
-</script>
-<script id="menu-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="menu-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -267,9 +279,10 @@ void main(void) {
     // couleur par défaut des munitions
     gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
-</script>
 
-<script id="options-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="options-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
 attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -284,8 +297,9 @@ gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
 // stockage de la coordonnee de texture
 vTextureCoord = aVertexCoord;
 }
-</script>
-<script id="options-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="options-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -297,9 +311,10 @@ void main(void) {
 // couleur par défaut des munitions
 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
-</script>
 
-<script id="cursor-vs" type="x-shader/x-vertex">
+    </script>
+
+    <script id="cursor-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
 attribute vec2 aVertexCoord; // sa coordonnee de texture
@@ -314,8 +329,9 @@ gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
 // stockage de la coordonnee de texture
 vTextureCoord = aVertexCoord;
 }
-</script>
-<script id="cursor-fs" type="x-shader/x-fragment">
+
+    </script>
+    <script id="cursor-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
 
@@ -327,518 +343,583 @@ void main(void) {
 // couleur par défaut des munitions
 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
-</script>
 
-<script type="text/javascript">
+    </script>
 
-    //----- BACKGROUND -----//
-    var fbo; // le FBO utilisé pour rendre la texture de hauteur
-    var heightfield; // l'objet heightfield, sa géométrie, son shader
-    var background; // l'objet background, sa géométrie, son shader
+    <script type="text/javascript">
 
-
-    //----- MENU -----//
-    var game; // Données et fonctions de la partie
-    var cursorTexture;
-
-    var menu;
-    var menuTexture;
-
-    var options;
-    var optionsTexture;
+        //----- BACKGROUND -----//
+        var fbo; // le FBO utilisé pour rendre la texture de hauteur
+        var heightfield; // l'objet heightfield, sa géométrie, son shader
+        var background; // l'objet background, sa géométrie, son shader
 
 
-    //----- ENTITÉS -----//
-    var spaceship; // l'objet spaceship, sa géométrie, son shader
-    var spaceshipTexture;
+        //----- MENU -----//
+        var game; // Données et fonctions de la partie
+        var cursorTexture;
+        var cursorLeftTexture;
 
-    var bullet; // l'objet bullet, sa géométrie, son shader
-    var bulletTexture;
-    var bullets = [];   // Liste des munitions
+        var menu;
+        var menuTexture;
 
-    var ennemy; // Ennemi
-    var ennemyTexture;
-    var ennemies = [];
+        var options;
+        var optionsTexture;
 
 
-    //----- SOUNDS -----//
-    var bullet_contact_sounds = [];
+        //----- ENTITÉS -----//
+        var spaceship; // l'objet spaceship, sa géométrie, son shader
+        var spaceshipTexture;
 
-    function drawScene() {
-        // initialisation du viewport
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        var bullet; // l'objet bullet, sa géométrie, son shader
+        var bulletTexture;
+        var bullets = [];   // Liste des munitions
 
-        // efface les buffers de couleur et de profondeur
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        var ennemy; // Ennemi
+        var ennemyTexture;
+        var ennemies = [];
 
-        // active le FBO (a partie de la, on dessine dans la texture associée)
-        gl.bindFramebuffer(gl.FRAMEBUFFER,fbo.id());
 
-        if(game.isPaused()){
-            // désactivation du FBO (on dessine sur l'ecran maintenant)
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        //----- SOUNDS -----//
+        var bullet_contact_sounds = [];
 
-            // dessin du background (utilise la texture dessinée précédemment)
-            drawBackground();
+        function drawScene() {
+            // initialisation du viewport
+            gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-            if(game.isOptions() === false){
-                // On affiche l'image du menu et le curseur
-                drawMenuCursor();
-                drawMenu();
+            // efface les buffers de couleur et de profondeur
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // active le FBO (a partie de la, on dessine dans la texture associée)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.id());
+
+            if (game.isPaused()) {
+                // désactivation du FBO (on dessine sur l'ecran maintenant)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+                // dessin du background (utilise la texture dessinée précédemment)
+                drawBackground();
+
+                if (game.isOptions() === false) {
+                    // On affiche l'image du menu et le curseur
+                    drawMenuCursor();
+                    drawMenu();
+                }
+                else {
+                    // On est dans les options
+                    drawOptionsCursor();
+                    drawOptions();
+                }
             }
             else {
-                // On est dans les options
-                drawOptionsCursor();
-                drawOptions();
+                // dessin du heightfield
+                drawHeightfield();
+
+                // désactivation du FBO (on dessine sur l'ecran maintenant)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+                // dessin du background (utilise la texture dessinée précédemment)
+                drawBackground();
+
+                // dessin du vaisseau (shader par défaut ici)
+                drawSpaceShip();
+
+                // dessin des munitions du vaisseau
+                drawBullets();
+
+                // dessin des ennemis
+                drawEnnemies();
             }
         }
-        else{
-            // dessin du heightfield
-            drawHeightfield();
 
-            // désactivation du FBO (on dessine sur l'ecran maintenant)
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        function drawOptions() {
+            gl.useProgram(options.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, optionsTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(options.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-            // dessin du background (utilise la texture dessinée précédemment)
-            drawBackground();
-
-            // dessin du vaisseau (shader par défaut ici)
-            drawSpaceShip();
-
-            // dessin des munitions du vaisseau
-            drawBullets();
-
-            // dessin des ennemis
-            drawEnnemies();
+            options.sendUniformVariables();
+            options.draw();
         }
-    }
 
-    function drawOptions(){
-        gl.useProgram(options.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,optionsTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(options.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawOptionsCursor() {
+            gl.useProgram(options.cursor.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, cursorTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(options.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        options.sendUniformVariables();
-        options.draw();
-    }
+            options.cursor.sendUniformVariables();
+            options.cursor.draw();
+        }
 
-    function drawOptionsCursor(){
-        gl.useProgram(options.cursor.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(options.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawMenu() {
+            gl.useProgram(menu.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, menuTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(menu.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        options.cursor.sendUniformVariables();
-        options.cursor.draw();
-    }
+            menu.sendUniformVariables();
+            menu.draw();
+        }
 
-    function drawMenu(){
-        gl.useProgram(menu.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,menuTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(menu.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawMenuCursor() {
+            gl.useProgram(menu.cursor.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, cursorTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(menu.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        menu.sendUniformVariables();
-        menu.draw();
-    }
+            menu.cursor.sendUniformVariables();
+            menu.cursor.draw();
+        }
 
-    function drawMenuCursor(){
-        gl.useProgram(menu.cursor.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(menu.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawHeightfield() {
+            gl.useProgram(heightfield.shader());
+            heightfield.sendUniformVariables();
+            heightfield.draw();
+        }
 
-        menu.cursor.sendUniformVariables();
-        menu.cursor.draw();
-    }
+        function drawBackground() {
+            gl.useProgram(background.shader());
+            background.sendUniformVariables();
+            background.draw();
+        }
 
-    function drawHeightfield(){
-        gl.useProgram(heightfield.shader());
-        heightfield.sendUniformVariables();
-        heightfield.draw();
-    }
+        function drawSpaceShip() {
+            gl.useProgram(spaceship.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, spaceshipTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-    function drawBackground(){
-        gl.useProgram(background.shader());
-        background.sendUniformVariables();
-        background.draw();
-    }
+            spaceship.sendUniformVariables();
+            spaceship.draw();
+        }
 
-    function drawSpaceShip(){
-        gl.useProgram(spaceship.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D,spaceshipTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawBullets() {
+            gl.useProgram(bullet.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, bulletTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(bullet.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        spaceship.sendUniformVariables();
-        spaceship.draw();
-    }
+            for (var i = 0; i < bullets.length; i++) {
+                bullets[i].sendUniformVariables();
+                bullets[i].draw();
 
-    function drawBullets(){
-        gl.useProgram(bullet.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D, bulletTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(bullet.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
-
-        for(var i=0; i<bullets.length; i++) {
-            bullets[i].sendUniformVariables();
-            bullets[i].draw();
-
-            // On évite que les munitions soient stockées à l'infini
-            if(i > 50){
-                bullets.shift();
+                // On évite que les munitions soient stockées à l'infini
+                if (i > 50) {
+                    bullets.shift();
+                }
             }
         }
-    }
 
-    function drawEnnemies(){
-        gl.useProgram(ennemy.shader());
-        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-        gl.bindTexture(gl.TEXTURE_2D, ennemyTexture); // on place maTexture dans l'unité active
-        gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        function drawEnnemies() {
+            gl.useProgram(ennemy.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, ennemyTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
-        for(var i=0; i<ennemies.length; i++) {
-            if(ennemies[i].getHp() <= 0){
-                // ANIMATION DE MORT?
+            for (var i = 0; i < ennemies.length; i++) {
+                if (ennemies[i].getHp() <= 0) {
+                    // ANIMATION DE MORT?
 
-                this.game.addScore(ennemies[i].getWorth()); // On ajoute des points au score
-                ennemies.splice(ennemies.indexOf(ennemies[i]), 1);
+                    this.game.addScore(ennemies[i].getWorth()); // On ajoute des points au score
+                    ennemies.splice(ennemies.indexOf(ennemies[i]), 1);
 
-                // On joue un son d'explosion
-                var sound_played = false;
-                var a=0;
-                while(sound_played === false && a<bullet_contact_sounds.length){
-                    if(bullet_contact_sounds[a].currentTime === 0){
-                        bullet_contact_sounds[a].play();
-                        sound_played = true;
+                    // On joue un son d'explosion
+                    var sound_played = false;
+                    var a = 0;
+                    while (sound_played === false && a < bullet_contact_sounds.length) {
+                        if (bullet_contact_sounds[a].currentTime === 0) {
+                            bullet_contact_sounds[a].play();
+                            sound_played = true;
+                        }
+                        else bullet_contact_sounds[a].load();
+                        a++;
                     }
-                    else bullet_contact_sounds[a].load();
-                    a++;
+                }
+                else {
+                    ennemies[i].sendUniformVariables();
+                    ennemies[i].draw();
+
+                    // On évite que les ennemies soient stockés à l'infini
+                    if (i > 30) {
+                        ennemies.shift();
+                    }
                 }
             }
-            else{
-                ennemies[i].sendUniformVariables();
-                ennemies[i].draw();
+        }
 
-                // On évite que les ennemies soient stockés à l'infini
-                if(i > 30){
-                    ennemies.shift();
+        // une bonne manière de gérer les évènements clavier
+        // permet d'avoir plusieurs touches appuyées simultanément
+        var currentlyPressedKeys = {};
+
+        function handleKeyDown(event) {
+            currentlyPressedKeys[event.keyCode] = true;
+        }
+
+
+        function handleKeyUp(event) {
+            currentlyPressedKeys[event.keyCode] = false;
+        }
+
+        function wait(ms) {
+            var start = new Date().getTime();
+            var end = start;
+            while (end < start + ms) {
+                end = new Date().getTime();
+            }
+        }
+
+        function handleKeys() {
+            if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
+                // Touche p
+                this.game.pause();
+                if (this.menu.cursor === null) this.menu.cursor = this.cursor;
+                this.menu.cursor.setPositionNumber("Menu", 1);
+                wait(300);  //On évite que l'action se déclenche plusieurs fois
+            }
+
+            // Contrôles du menu
+            if (this.game.isPaused()) {
+
+                // MENU
+                if (this.game.isOptions() === false) {
+                    // Sélection d'une entrée du menu
+                    if (currentlyPressedKeys[13]) {
+                        var entry = this.menu.cursor.getPositionNumber();
+
+                        // Resume
+                        if (entry === 1) {
+                            this.game.pause();
+                        }
+                        // Options
+                        else if (entry === 2) {
+                            // Activation des options
+                            this.game.options();
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                        }
+                        else if (entry === 3) {
+
+                        }
+                    }
+
+                    // Flèche du bas
+                    if (currentlyPressedKeys[40]) {
+                        if (this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbLines()) {
+                            this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() + 1);
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                        }
+                    }
+
+                    // Flèche du haut
+                    if (currentlyPressedKeys[38]) {
+                        if (this.menu.cursor.getPositionNumber() > 1) {
+                            this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() - 1);
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                        }
+                    }
+                }
+                // OPTIONS
+                else {
+                    // Sélection d'une entrée du menu
+                    var entry = this.options.cursor.getPositionNumber();
+                    var line = entry % 10;
+                    console.log(line);
+
+                    //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
+                    // Flèche du bas
+                    if (currentlyPressedKeys[40]) {
+                        if (line < this.options.cursor.getNbLines()) {
+                            line = (line + 1) * 10 + 1;
+                            this.options.cursor.setPositionNumber("Options", line);
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                        }
+                    }
+
+                    // Flèche du haut
+                    if (currentlyPressedKeys[38]) {
+                        if (line > 1) {
+                            line = (line + 1) * 10 + 1;
+                            this.options.cursor.setPositionNumber("Options", line);
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                        }
+                    }
+
+                    //----- DÉPLACEMENTS AU SEIN D'UNE LIGNE -----//
+                    // SOUNDS
+                    if(line === 1){
+                        // Flèche de droite
+                        if (currentlyPressedKeys[39]) {
+                            this.options.cursor.setPositionNumber("Options", 12);
+                            this.options.setSounds(true);
+
+                        }
+
+                        // Flèche de gauche
+                        if (currentlyPressedKeys[37]) {
+                            this.options.cursor.setPositionNumber("Options", 11);
+                            this.options.setSounds(false);
+                        }
+                    }
+                    // LEVEL
+                    else if(line === 2){
+                        // Flèche de droite
+                        if (currentlyPressedKeys[39]) {
+                            this.options.cursor.setPositionNumber("Options", 22);
+                            this.options.setLevel(2);
+
+                        }
+
+                        // Flèche de gauche
+                        if (currentlyPressedKeys[37]) {
+                            this.options.cursor.setPositionNumber("Options", 21);
+                            this.options.setLevel(1);
+                        }
+                    }
                 }
             }
         }
-    }
 
-    // une bonne manière de gérer les évènements clavier
-    // permet d'avoir plusieurs touches appuyées simultanément
-    var currentlyPressedKeys = {};
-
-    function handleKeyDown(event) {
-        currentlyPressedKeys[event.keyCode] = true;
-    }
-
-
-    function handleKeyUp(event) {
-        currentlyPressedKeys[event.keyCode] = false;
-    }
-
-    function wait(ms){
-        var start = new Date().getTime();
-        var end = start;
-        while(end < start + ms) {
-            end = new Date().getTime();
-        }
-    }
-
-    function handleKeys() {
-        if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
-            // Touche p
-            this.game.pause();
-            if(this.menu.cursor === null) this.menu.cursor = this.cursor;
-            this.menu.cursor.setPositionNumber(1);
-            wait(300);  //On évite que l'action se déclenche plusieurs fois
+        function mouseMove(event) {
+            // contrôle de la position du vaisseau en fonction de la souris
+            // la position est remappée entre -1 et 1 pour cela
+            var newx = 2.0 * (event.clientX / gl.viewportWidth) - 1.0;
+            var newy = -(2.0 * (event.clientY / gl.viewportHeight) - 1.0);
+            spaceship.setPosition(newx, newy);
         }
 
-        // Contrôles du menu
-        if(this.game.isPaused()){
 
-            // Sélection d'une entrée du menu
-            if (currentlyPressedKeys[13]) {
-                var entry = this.menu.cursor.getPositionNumber();
+        // animation
+        var lastTime = 0;
 
-                // Resume
-                if(entry === 1) {
-                    this.game.pause();
-                }
-                // Options
-                else if(entry === 2) {
-                    // Activation des options
-                    this.game.options();
-                    drawScene();
-                    wait(130); //On évite que l'action se déclenche plusieurs fois
-                }
-                else if(entry === 3){
+        function animate() {
+            var timeNow = new Date().getTime();
+            if (lastTime !== 0) {
+                // chaque objet est susceptible de s'animer
+                var elapsed = timeNow - lastTime;
+                heightfield.setParameters(elapsed);
+                spaceship.setParameters(elapsed);
+                background.setParameters(elapsed);
 
+                // Calcul de la nouvelle position des munitions afin qu'elles avancent
+                animateBullets(elapsed);
+
+                // Calcul de la nouvelle position des ennemis afin qu'ils avancent
+                animateEnnemies(elapsed);
+            }
+            lastTime = timeNow;
+        }
+
+        function animateBullets(elapsed) {
+            for (var i = 0; i < bullets.length; i++) {
+                bullets[i].setPosition(bullets[i].position[0], bullets[i].position[1] + 0.025);
+                bullets[i].setParameters(elapsed);
+            }
+        }
+
+        function animateEnnemies(elapsed) {
+            for (var i = 0; i < ennemies.length; i++) {
+                ennemies[i].setPosition(ennemies[i].position[0], ennemies[i].position[1] - 0.01);
+                ennemies[i].setParameters(elapsed);
+            }
+        }
+
+        function tick() {
+            var gameStatus = checkGameStatus();
+            if (gameStatus === "Normal") { // Vérification des stats du vaisseau et de la partie
+                requestAnimFrame(tick);
+                handleKeys();
+                drawScene();
+                animate();
+                fire();
+                spawnEnnemy();
+                checkCollisions();
+            } else if (gameStatus === "Ended") {
+
+            } else if (gameStatus === "Paused") {
+                requestAnimFrame(tick);
+                handleKeys();
+            }
+        }
+
+        function checkGameStatus() {
+            // On met à jour l'affichage des stats dans la barre
+            document.getElementById("stats_hp").innerText = spaceship.getHp();
+            document.getElementById("stats_score").innerText = game.getScore();
+
+            if (game.isPaused()) {
+                return "Paused";
+            }
+
+            if (spaceship.getHp() <= 0) {
+                game.end();
+                return "Ended";
+            }
+
+            return "Normal";
+        }
+
+        function checkCollisions() {
+            //----- On traite les collisions entre les projectiles et les ennemis -----//
+            // Pour chaque projectile
+            for (var i = 0; i < bullets.length; i++) {
+                var bulletX = bullets[i].position[0];
+                var bulletY = bullets[i].position[1];
+
+                // Pour chaque ennemi
+                for (var j = 0; j < ennemies.length; j++) {
+                    var ennemyX = ennemies[j].position[0];
+                    var ennemyY = ennemies[j].position[1];
+
+                    // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
+                    if (bulletX - ennemyX < 0.15 && bulletX - ennemyX > -0.15 && bulletY - ennemyY < 0.1 && bulletY - ennemyY > -0.1) {
+                        // L'ennemi perd de la vie
+                        ennemies[j].setHp(ennemies[j].getHp() - spaceship.getDamages());
+
+                        // Le projectile est détruit
+                        bullets.splice(bullets.indexOf(bullets[i]), 1);
+                    }
                 }
             }
 
-            // Flèche du bas
-            if (currentlyPressedKeys[40]) {
-                if(this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbEntries()){
-                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() + 1);
-                    drawScene();
-                    wait(130); //On évite que l'action se déclenche plusieurs fois
-                }
-            }
-
-            // Flèche du haut
-            if (currentlyPressedKeys[38]) {
-                if(this.menu.cursor.getPositionNumber() > 1){
-                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() - 1);
-                    drawScene();
-                    wait(130); //On évite que l'action se déclenche plusieurs fois
-                }
-            }
-
-        }
-
-    }
-
-    function mouseMove(event) {
-        // contrôle de la position du vaisseau en fonction de la souris
-        // la position est remappée entre -1 et 1 pour cela
-        var newx = 2.0*(event.clientX/gl.viewportWidth)-1.0;
-        var newy = -(2.0*(event.clientY/gl.viewportHeight)-1.0);
-        spaceship.setPosition(newx,newy);
-    }
-
-
-    // animation
-    var lastTime = 0;
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime !== 0) {
-            // chaque objet est susceptible de s'animer
-            var elapsed = timeNow - lastTime;
-            heightfield.setParameters(elapsed);
-            spaceship.setParameters(elapsed);
-            background.setParameters(elapsed);
-
-            // Calcul de la nouvelle position des munitions afin qu'elles avancent
-            animateBullets(elapsed);
-
-            // Calcul de la nouvelle position des ennemis afin qu'ils avancent
-            animateEnnemies(elapsed);
-        }
-        lastTime = timeNow;
-    }
-
-    function animateBullets(elapsed){
-        for(var i=0; i<bullets.length; i++){
-            bullets[i].setPosition(bullets[i].position[0], bullets[i].position[1] + 0.025);
-            bullets[i].setParameters(elapsed);
-        }
-    }
-
-    function animateEnnemies(elapsed){
-        for(var i=0; i<ennemies.length; i++){
-            ennemies[i].setPosition(ennemies[i].position[0], ennemies[i].position[1] - 0.01);
-            ennemies[i].setParameters(elapsed);
-        }
-    }
-
-    function tick() {
-        var gameStatus = checkGameStatus();
-        if(gameStatus === "Normal") { // Vérification des stats du vaisseau et de la partie
-            requestAnimFrame(tick);
-            handleKeys();
-            drawScene();
-            animate();
-            fire();
-            spawnEnnemy();
-            checkCollisions();
-        } else if(gameStatus === "Ended"){
-
-        } else if(gameStatus === "Paused"){
-            requestAnimFrame(tick);
-            handleKeys();
-        }
-    }
-
-    function checkGameStatus(){
-        // On met à jour l'affichage des stats dans la barre
-        document.getElementById("stats_hp").innerText = spaceship.getHp();
-        document.getElementById("stats_score").innerText = game.getScore();
-
-        if(game.isPaused()){
-            return "Paused";
-        }
-
-        if(spaceship.getHp() <= 0){
-            game.end();
-            return "Ended";
-        }
-
-        return "Normal";
-    }
-
-    function checkCollisions(){
-    //----- On traite les collisions entre les projectiles et les ennemis -----//
-        // Pour chaque projectile
-        for(var i=0; i<bullets.length; i++){
-            var bulletX = bullets[i].position[0];
-            var bulletY = bullets[i].position[1];
+            //----- On traite les collisions entre les ennemis et le vaisseau -----//
+            var spaceshipX = spaceship.position[0];
+            var spaceshipY = spaceship.position[1];
 
             // Pour chaque ennemi
-            for(var j=0; j<ennemies.length; j++){
-                var ennemyX = ennemies[j].position[0];
-                var ennemyY = ennemies[j].position[1];
+            for (var k = 0; k < ennemies.length; k++) {
+                ennemyX = ennemies[k].position[0];
+                ennemyY = ennemies[k].position[1];
 
-                // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
-                if(bulletX - ennemyX < 0.15 && bulletX - ennemyX > -0.15 && bulletY - ennemyY < 0.1 && bulletY - ennemyY > - 0.1){
-                    // L'ennemi perd de la vie
-                    ennemies[j].setHp(ennemies[j].getHp() - spaceship.getDamages());
+                // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
+                if (spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > -0.1) {
+                    // Le vaisseau perd de la vie
+                    spaceship.setHp(spaceship.getHp() - 1);
 
-                    // Le projectile est détruit
-                    bullets.splice(bullets.indexOf(bullets[i]), 1);
+                    // L'ennemi est détruit
+                    ennemies.splice(ennemies.indexOf(ennemies[k]), 1);
                 }
             }
         }
 
-    //----- On traite les collisions entre les ennemis et le vaisseau -----//
-        var spaceshipX = spaceship.position[0];
-        var spaceshipY = spaceship.position[1];
-
-        // Pour chaque ennemi
-        for(var k=0; k<ennemies.length; k++){
-            ennemyX = ennemies[k].position[0];
-            ennemyY = ennemies[k].position[1];
-
-            // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
-            if(spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > - 0.1){
-                // Le vaisseau perd de la vie
-                spaceship.setHp(spaceship.getHp() - 1);
-
-                // L'ennemi est détruit
-                ennemies.splice(ennemies.indexOf(ennemies[k]), 1);
+        var fireDelay = 225; // Compteur afin de gérer la fréquence des tirs
+        function fire() {
+            if (fireDelay > 0) fireDelay--;
+            else {
+                bullet = new Bullet();
+                bullet.setPosition(spaceship.position[0], spaceship.position[1] + 0.2);
+                bullets.push(bullet);
+                fireDelay = 12;
             }
         }
-    }
 
-    var fireDelay = 225; // Compteur afin de gérer la fréquence des tirs
-    function fire() {
-        if(fireDelay > 0) fireDelay--;
-        else{
+
+        var ennemySpawnDelay = 200;
+        var randomX;
+        var nbSpawnedEnnemies = 0;
+
+        function spawnEnnemy() {
+            if (ennemySpawnDelay > 0) ennemySpawnDelay--;
+            else {
+                ennemy = new Ennemy();
+                nbSpawnedEnnemies++;
+
+                // On génère une valeur aléatoire pour la position de départ de l'ennemi
+                randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)), 1).toFixed(2));
+
+                ennemy.setPosition(randomX, 1);
+                ennemies.push(ennemy);
+
+                ennemySpawnDelay = ennemySpawnDelay = 50 - (nbSpawnedEnnemies * 0.15);
+                if (ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
+            }
+        }
+
+
+        function webGLStart() {
+            // initialisation du canvas et des objets OpenGL
+            var canvas = document.getElementById("SpaceShip");
+            initGL(canvas);
+
+            // init FBO
+            fbo = new FBO(canvas.width, canvas.height, 1, false);
+
+            // init de tous les shaders
+            initHeightfieldShader();
+            initBackgroundShader();
+            initSpaceshipShader();
+            initBulletShader();
+            initEnnemyShader();
+            initMenuShader();
+            initOptionsShader();
+            initCursorShader();
+
+            // init de tous les sons
+            for (var i = 0; i < 10; i++) {
+                bullet_contact_sounds.push(new Audio('sounds/bullet_contact.mp3'));
+                bullet_contact_sounds[i].volume = 0.2;
+            }
+
+            // Entités
+            spaceshipTexture = initTexture("images/final_sprites.png");
+            bulletTexture = initTexture("images/final_sprites.png");
+            ennemyTexture = initTexture("images/final_sprites.png");
+
+            // Menu
+            menuTexture = initTexture("images/menu/menu.png");
+            optionsTexture = initTexture("images/menu/options.png");
+            cursorTexture = initTexture("images/menu/cursor.png");
+            cursorLeftTexture = initTexture("images/menu/cursor_left.png");
+
+            // init de tous les objets fixes
+            heightfield = new Heightfield();
+            background = new Background(fbo.texture(0));
+
+            spaceship = new Spaceship();
             bullet = new Bullet();
-            bullet.setPosition(spaceship.position[0], spaceship.position[1]+0.2);
-            bullets.push(bullet);
-            fireDelay = 12;
-        }
-    }
-
-
-    var ennemySpawnDelay = 200;
-    var randomX;
-    var nbSpawnedEnnemies = 0;
-    function spawnEnnemy(){
-        if(ennemySpawnDelay > 0) ennemySpawnDelay--;
-        else{
             ennemy = new Ennemy();
-            nbSpawnedEnnemies++;
 
-            // On génère une valeur aléatoire pour la position de départ de l'ennemi
-            randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)),1).toFixed(2));
+            game = new Game();
 
-            ennemy.setPosition(randomX,1);
-            ennemies.push(ennemy);
+            menu = new Menu();
+            menu.setCursor(new Cursor(3));
 
-            ennemySpawnDelay = ennemySpawnDelay = 50-(nbSpawnedEnnemies*0.15);
-            if(ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
-        }
-    }
+            options = new Options();
+            options.setCursor(new Cursor(4));
 
+            // la couleur de fond sera noire
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-    function webGLStart() {
-        // initialisation du canvas et des objets OpenGL
-        var canvas = document.getElementById("SpaceShip");
-        initGL(canvas);
+            // active le test de profondeur
+            gl.enable(gl.DEPTH_TEST);
 
-        // init FBO
-        fbo = new FBO(canvas.width,canvas.height,1,false);
+            /* Mouse and keyboard interaction functions */
+            //canvas.addEventListener('mousedown', tbMouseDown, true);
+            canvas.addEventListener('mousemove', mouseMove, true);
+            //canvas.addEventListener('mouseup', tbMouseUp, true);
 
-        // init de tous les shaders
-        initHeightfieldShader();
-        initBackgroundShader();
-        initSpaceshipShader();
-        initBulletShader();
-        initEnnemyShader();
-        initMenuShader();
-        initOptionsShader();
-        initCursorShader();
+            document.onkeydown = handleKeyDown;
+            document.onkeyup = handleKeyUp;
 
-        // init de tous les sons
-        for(var i=0; i<10; i++){
-            bullet_contact_sounds.push(new Audio('sounds/bullet_contact.mp3'));
-            bullet_contact_sounds[i].volume = 0.2;
+            // dessine la scene
+            tick();
         }
 
-        // Entités
-        spaceshipTexture = initTexture("images/final_sprites.png");
-        bulletTexture = initTexture("images/final_sprites.png");
-        ennemyTexture = initTexture("images/final_sprites.png");
 
-        // Menu
-        menuTexture = initTexture("images/menu/menu.png");
-        optionsTexture = initTexture("images/menu/options.png");
-        cursorTexture = initTexture("images/menu/cursor.png");
-
-        // init de tous les objets fixes
-        heightfield = new Heightfield();
-        background = new Background(fbo.texture(0));
-
-        spaceship = new Spaceship();
-        bullet = new Bullet();
-        ennemy = new Ennemy();
-
-        game = new Game();
-
-        menu = new Menu();
-        menu.setCursor(new Cursor());
-
-        options = new Options();
-        options.setCursor(new Cursor());
-
-        // la couleur de fond sera noire
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-        // active le test de profondeur
-        gl.enable(gl.DEPTH_TEST);
-
-        /* Mouse and keyboard interaction functions */
-        //canvas.addEventListener('mousedown', tbMouseDown, true);
-        canvas.addEventListener('mousemove', mouseMove, true);
-        //canvas.addEventListener('mouseup', tbMouseUp, true);
-
-        document.onkeydown = handleKeyDown;
-        document.onkeyup = handleKeyUp;
-
-        // dessine la scene
-        tick();
-    }
-
-
-</script>
+    </script>
 
 
 </head>
 
 
 <body onload="webGLStart();">
-    <div class="center">
-        <canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
-        <div id="statsBar" style="background-color: skyblue; width: 780px; height:25px; text-align: right; padding: 0 10px;">
-            Score : <span id="stats_score">0</span> |
-            HP : <span id="stats_hp">5</span>
-        </div>
-    </div>
-</body></html>
+<canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
+<div id="statsBar" style="background-color: skyblue; width: 780px; height:25px; text-align: right; padding: 0 10px;">
+    Score : <span id="stats_score">0</span> |
+    HP : <span id="stats_hp">5</span>
+</div>
+</body>
+</html>
