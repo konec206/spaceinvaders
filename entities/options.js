@@ -70,11 +70,38 @@ Options.prototype.initParameters = function() {
     this.height = 1.9;
     this.position = [0.0,-0.0];
     this.cursor = null;
+    this.sounds = true;
+    this.level = 1;
+    this.skin = 1;
 };
 
 Options.prototype.setParameters = function(elapsed) {
     // on pourrait animer des choses ici
 
+};
+
+Options.prototype.setSounds = function(value){
+    this.sounds = value;
+};
+
+Options.prototype.isSoundEnabled = function() {
+    return this.sounds;
+};
+
+Options.prototype.setLevel = function(newLevel){
+    this.level = newLevel;
+};
+
+Options.prototype.getLevel = function(){
+    return this.level;
+};
+
+Options.prototype.getSkin = function() {
+    return this.skin;
+};
+
+Options.prototype.setSkin = function(skinNumber) {
+    this.skin = skinNumber;
 };
 
 Options.prototype.setPosition = function(x,y) {

@@ -134,7 +134,7 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
             this.setPosition(0.2, -0.45);
         }
 
-        //Quatrième ligne (Save / Back)
+        //Quatrième ligne (Save)
         else if (this.getPositionNumber() === 41) {
             this.setPosition(-0.5, -0.8);
         }
