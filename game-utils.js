@@ -55,11 +55,11 @@ function getShader(gl, id) {
 
 
 function initShaders(vsId,fsId) {
-    // recupere les vertex et fragment shaders 
+    // récupère les vertex et fragment shaders
     var fragmentShader = getShader(gl,fsId);
     var vertexShader = getShader(gl,vsId);
 
-    // cree le programme et lui associe les vertex/fragments
+    // créé le programme et lui associe les vertex/fragments
     var shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
@@ -90,7 +90,7 @@ function initTexture(filename) {
     texture.image = new Image();
 
     texture.image.onload = function () {
-        handleLoadedTexture(texture)
+        handleLoadedTexture(texture);
         texture.width = this.width;
         texture.height = this.height;
     }
@@ -110,7 +110,7 @@ function mvPushMatrix() {
 }
 
 function mvPopMatrix() {
-    if (mvMatrixStack.length == 0) {
+    if (mvMatrixStack.length === 0) {
         throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();

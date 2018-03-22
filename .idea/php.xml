@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpInterpreters">
+    <interpreters>
+      <interpreter home="$USER_HOME$/Library/Caches/IntelliJIdea2017.2/plugins/idea-php-latest-plugin/php-v7.2.3/php.sh" id="c8303a30-cadf-4aa3-ab9a-5bc1d6af0430" name="PHP latest" debugger_id="php.debugger.XDebug" />
+    </interpreters>
+  </component>
+</project>

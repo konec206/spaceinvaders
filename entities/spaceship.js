@@ -6,18 +6,17 @@ function initSpaceshipShader() {
     // active ce shader
     gl.useProgram(spaceshipShader);
 
-    // recupere la localisation de l'attribut dans lequel on souhaite acceder aux positions
+    // recupere la localisation de l'attribut dans lequel on souhaite accéder aux positions
     spaceshipShader.vertexPositionAttribute = gl.getAttribLocation(spaceshipShader, "aVertexPosition");
     gl.enableVertexAttribArray(spaceshipShader.vertexPositionAttribute); // active cet attribut 
 
-    // pareil pour les coordonnees de texture 
+    // pareil pour les coordonnées de texture
     spaceshipShader.vertexCoordAttribute = gl.getAttribLocation(spaceshipShader, "aVertexCoord");
     gl.enableVertexAttribArray(spaceshipShader.vertexCoordAttribute);
 
      // adresse de la variable uniforme uOffset dans le shader
     spaceshipShader.positionUniform = gl.getUniformLocation(spaceshipShader, "uPosition");
-
-    console.log("spaceship shader initialized");
+    spaceshipShader.maTextureUniform = gl.getUniformLocation(spaceshipShader, "uMaTexture");
 }
 
 function Spaceship() {
@@ -47,11 +46,14 @@ function Spaceship() {
 	this.coordBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
 	var coords = [
-		 0.0, 0.0, 
-		 1.0, 0.0, 
-		 1.0, 1.0, 
-		 0.0, 1.0
+        0.4, 0.225,
+        0.5, 0.225,
+        0.5, 0.425,
+        0.4, 0.425
 	];
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
 	this.coordBuffer.itemSize = 2;
@@ -63,31 +65,48 @@ function Spaceship() {
 	var tri = [0,1,2,0,2,3];
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tri), gl.STATIC_DRAW);
     this.triangles.numItems = 6;
-    
-    console.log("spaceship initialized");
 }
 
 Spaceship.prototype.initParameters = function() {
 	this.width = 0.2;
 	this.height = 0.2;
 	this.position = [0.0,-0.7];
-}
+	this.hp = 5;
+	this.damages = 50;
+};
 
 Spaceship.prototype.setParameters = function(elapsed) {
 	// on pourrait animer des choses ici
-}
+
+};
 
 Spaceship.prototype.setPosition = function(x,y) {
 	this.position = [x,y];
-}
+};
 
 Spaceship.prototype.shader = function() {
 	return spaceshipShader;
-}
+};
 
 Spaceship.prototype.sendUniformVariables = function() {
 	gl.uniform2fv(spaceshipShader.positionUniform,this.position);
-}
+};
+
+Spaceship.prototype.setHp = function(newHp) {
+	this.hp = newHp;
+};
+
+Spaceship.prototype.getHp = function() {
+	return this.hp;
+};
+
+Spaceship.prototype.setDamages = function(newDamages) {
+    this.damages = newDamages;
+};
+
+Spaceship.prototype.getDamages = function() {
+    return this.damages;
+};
 
 Spaceship.prototype.draw = function() {
 	// active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader

@@ -6,14 +6,21 @@
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="game-utils.js"></script>
 <script type="text/javascript" src="fbo.js"></script>
-<script type="text/javascript" src="heightfield.js"></script>
-<script type="text/javascript" src="background.js"></script>
-<script type="text/javascript" src="spaceship.js"></script>
+<script type="text/javascript" src="entities/heightfield.js"></script>
+<script type="text/javascript" src="entities/background.js"></script>
+<script type="text/javascript" src="entities/spaceship.js"></script>
+<script type="text/javascript" src="entities/bullet.js"></script>
+<script type="text/javascript" src="entities/ennemy.js"></script>
+<script type="text/javascript" src="entities/game.js"></script>
+<script type="text/javascript" src="entities/menu.js"></script>
+<script type="text/javascript" src="entities/options.js"></script>
+<script type="text/javascript" src="entities/cursor.js"></script>
+
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
 
@@ -25,7 +32,6 @@
         vTextureCoord = aVertexCoord;
     }
 </script>
-
 <script id="heightfield-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
@@ -44,16 +50,16 @@ float hash(vec2 p) {
 }
 
 float vnoise(in vec2 p) {
-    // genere une valeur random sur une position spÃ©cifique d'une grille
+    // genere une valeur random sur une position spécifique d'une grille
     // pris sur shadertoy
     vec2 i = floor(p);
     vec2 f = fract(p);
-    
+
     vec2 u = f*f*(3.0-2.0*f);
 
-    return mix( mix( hash( i + vec2(0.0,0.0) ), 
+    return mix( mix( hash( i + vec2(0.0,0.0) ),
                      hash( i + vec2(1.0,0.0) ), u.x),
-                mix( hash( i + vec2(0.0,1.0) ), 
+                mix( hash( i + vec2(0.0,1.0) ),
                      hash( i + vec2(1.0,1.0) ), u.x), u.y);
 }
 
@@ -82,9 +88,9 @@ void main(void) {
 </script>
 
 <script id="background-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
 
@@ -96,7 +102,6 @@ void main(void) {
         vTextureCoord = aVertexCoord;
     }
 </script>
-
 <script id="background-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
@@ -108,10 +113,10 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 vec3 shade(in vec3 n,in float d) {
     vec2 xy = vTextureCoord.xy*2.0-vec2(1.0);
     vec3 v = -normalize(vec3(xy.x,xy.y,1.0)); // vecteur vue
-    vec3 l = normalize(vec3(-0.3,0.0,1.0)); // vecteur lumiÃ¨re (pourrait varier au cours du temps pour de meilleurs effets)
+    vec3 l = normalize(vec3(-0.3,0.0,1.0)); // vecteur lumière (pourrait varier au cours du temps pour de meilleurs effets)
 
     // TODO : le shading !
-    // la fonction prend en entrÃ©e la normale du terrain et sa profondeur
+    // la fonction prend en entrée la normale du terrain et sa profondeur
 
     return n;
 }
@@ -128,7 +133,7 @@ vec3 computeNormal() {
     float gx = 0.5*(xp-xm)*scale;
     float gy = 0.5*(yp-ym)*scale;
 
-    vec3 v1 = normalize(vec3(1.0,0.0,gx));  
+    vec3 v1 = normalize(vec3(1.0,0.0,gx));
     vec3 v2 = normalize(vec3(0.0,1.0,gy));
 
     return cross(v1,v2);
@@ -144,9 +149,9 @@ void main(void) {
 </script>
 
 <script id="spaceship-vs" type="x-shader/x-vertex">
-    // *** le vertex shader *** 
-    attribute vec3 aVertexPosition; // la position du sommet 
-    attribute vec2 aVertexCoord; // sa coordonnee de texture 
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
 
     uniform vec2 uPosition; // position du vaisseau
     varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
@@ -165,19 +170,199 @@ precision highp float; // precision des nombres flottant
 
 varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
+    uniform sampler2D uMaTexture; // la texture en entree
+
 void main(void) {
     // couleur par defaut du vaisseau... a changer
-    gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
+}
+</script>
+
+<script id="bullet-vs" type="x-shader/x-vertex">
+    // *** le vertex shader ***
+    attribute vec3 aVertexPosition; // la position du sommet
+    attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+    uniform vec2 uPosition; // position de la munition
+    varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+    void main(void) {
+        // projection de la position
+        gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+        // stockage de la coordonnee de texture
+        vTextureCoord = aVertexCoord;
+    }
+</script>
+<script id="bullet-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
+<script id="ennemy-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+    // projection de la position
+    gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+    // stockage de la coordonnee de texture
+    vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="ennemy-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
+<script id="menu-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="menu-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+    uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+    // couleur par défaut des munitions
+    gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
+<script id="options-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="options-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+// couleur par défaut des munitions
+gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+</script>
+
+<script id="cursor-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+</script>
+<script id="cursor-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+// couleur par défaut des munitions
+gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
 </script>
 
 <script type="text/javascript">
 
-    var fbo; // le FBO utilisÃ© pour rendre la texture de hauteur
-    var heightfield; // l'objet heightfield, sa gÃ©omÃ©trie, son shader
-    var background; // l'objet background, sa gÃ©omÃ©trie, son shader
-    var spaceship; // l'objet spaceship, sa gÃ©omÃ©trie, son shader
+    //----- BACKGROUND -----//
+    var fbo; // le FBO utilisé pour rendre la texture de hauteur
+    var heightfield; // l'objet heightfield, sa géométrie, son shader
+    var background; // l'objet background, sa géométrie, son shader
+
+
+    //----- MENU -----//
+    var game; // Données et fonctions de la partie
+    var cursorTexture;
+
+    var menu;
+    var menuTexture;
+
+    var options;
+    var optionsTexture;
+
+
+    //----- ENTITÉS -----//
+    var spaceship; // l'objet spaceship, sa géométrie, son shader
+    var spaceshipTexture;
+
+    var bullet; // l'objet bullet, sa géométrie, son shader
+    var bulletTexture;
+    var bullets = [];   // Liste des munitions
+
+    var ennemy; // Ennemi
+    var ennemyTexture;
+    var ennemies = [];
+
+
+    //----- SOUNDS -----//
+    var bullet_contact_sounds = [];
 
     function drawScene() {
         // initialisation du viewport
@@ -186,30 +371,166 @@ void main(void) {
         // efface les buffers de couleur et de profondeur
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        // active le FBO (a partie de la, on dessine dans la texture associÃ©e)
+        // active le FBO (a partie de la, on dessine dans la texture associée)
         gl.bindFramebuffer(gl.FRAMEBUFFER,fbo.id());
 
-        // dessin du heightfield
+        if(game.isPaused()){
+            // désactivation du FBO (on dessine sur l'ecran maintenant)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            // dessin du background (utilise la texture dessinée précédemment)
+            drawBackground();
+
+            if(game.isOptions() === false){
+                // On affiche l'image du menu et le curseur
+                drawMenuCursor();
+                drawMenu();
+            }
+            else {
+                // On est dans les options
+                drawOptionsCursor();
+                drawOptions();
+            }
+        }
+        else{
+            // dessin du heightfield
+            drawHeightfield();
+
+            // désactivation du FBO (on dessine sur l'ecran maintenant)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            // dessin du background (utilise la texture dessinée précédemment)
+            drawBackground();
+
+            // dessin du vaisseau (shader par défaut ici)
+            drawSpaceShip();
+
+            // dessin des munitions du vaisseau
+            drawBullets();
+
+            // dessin des ennemis
+            drawEnnemies();
+        }
+    }
+
+    function drawOptions(){
+        gl.useProgram(options.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,optionsTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(options.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        options.sendUniformVariables();
+        options.draw();
+    }
+
+    function drawOptionsCursor(){
+        gl.useProgram(options.cursor.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(options.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        options.cursor.sendUniformVariables();
+        options.cursor.draw();
+    }
+
+    function drawMenu(){
+        gl.useProgram(menu.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,menuTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(menu.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        menu.sendUniformVariables();
+        menu.draw();
+    }
+
+    function drawMenuCursor(){
+        gl.useProgram(menu.cursor.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,cursorTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(menu.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        menu.cursor.sendUniformVariables();
+        menu.cursor.draw();
+    }
+
+    function drawHeightfield(){
         gl.useProgram(heightfield.shader());
         heightfield.sendUniformVariables();
         heightfield.draw();
+    }
 
-        // desactivation du FBO (on dessine sur l'ecran maintenant)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        // dessin du background (utilise la texture dessinÃ©e prÃ©cÃ©demment)
+    function drawBackground(){
         gl.useProgram(background.shader());
         background.sendUniformVariables();
         background.draw();
+    }
 
-        // dessin du vaisseau (shader par defaut ici)
+    function drawSpaceShip(){
         gl.useProgram(spaceship.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,spaceshipTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
         spaceship.sendUniformVariables();
         spaceship.draw();
     }
 
-    // une bonne maniÃ¨re de gerer les evenements claviers
-    // permet d'avoir plusieurs touches appuyÃ©es simultanÃ©men
+    function drawBullets(){
+        gl.useProgram(bullet.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D, bulletTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(bullet.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        for(var i=0; i<bullets.length; i++) {
+            bullets[i].sendUniformVariables();
+            bullets[i].draw();
+
+            // On évite que les munitions soient stockées à l'infini
+            if(i > 50){
+                bullets.shift();
+            }
+        }
+    }
+
+    function drawEnnemies(){
+        gl.useProgram(ennemy.shader());
+        gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D, ennemyTexture); // on place maTexture dans l'unité active
+        gl.uniform1i(ennemy.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+        for(var i=0; i<ennemies.length; i++) {
+            if(ennemies[i].getHp() <= 0){
+                // ANIMATION DE MORT?
+
+                this.game.addScore(ennemies[i].getWorth()); // On ajoute des points au score
+                ennemies.splice(ennemies.indexOf(ennemies[i]), 1);
+
+                // On joue un son d'explosion
+                var sound_played = false;
+                var a=0;
+                while(sound_played === false && a<bullet_contact_sounds.length){
+                    if(bullet_contact_sounds[a].currentTime === 0){
+                        bullet_contact_sounds[a].play();
+                        sound_played = true;
+                    }
+                    else bullet_contact_sounds[a].load();
+                    a++;
+                }
+            }
+            else{
+                ennemies[i].sendUniformVariables();
+                ennemies[i].draw();
+
+                // On évite que les ennemies soient stockés à l'infini
+                if(i > 30){
+                    ennemies.shift();
+                }
+            }
+        }
+    }
+
+    // une bonne manière de gérer les évènements clavier
+    // permet d'avoir plusieurs touches appuyées simultanément
     var currentlyPressedKeys = {};
 
     function handleKeyDown(event) {
@@ -221,41 +542,219 @@ void main(void) {
         currentlyPressedKeys[event.keyCode] = false;
     }
 
-    function handleKeys() {
-        if (currentlyPressedKeys[33]) {
-            // Page Up (par exemple)
-            // faire quelque chose... 
+    function wait(ms){
+        var start = new Date().getTime();
+        var end = start;
+        while(end < start + ms) {
+            end = new Date().getTime();
         }
     }
 
+    function handleKeys() {
+        if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
+            // Touche p
+            this.game.pause();
+            if(this.menu.cursor === null) this.menu.cursor = this.cursor;
+            this.menu.cursor.setPositionNumber(1);
+            wait(300);  //On évite que l'action se déclenche plusieurs fois
+        }
+
+        // Contrôles du menu
+        if(this.game.isPaused()){
+
+            // Sélection d'une entrée du menu
+            if (currentlyPressedKeys[13]) {
+                var entry = this.menu.cursor.getPositionNumber();
+
+                // Resume
+                if(entry === 1) {
+                    this.game.pause();
+                }
+                // Options
+                else if(entry === 2) {
+                    // Activation des options
+                    this.game.options();
+                    drawScene();
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
+                }
+                else if(entry === 3){
+
+                }
+            }
+
+            // Flèche du bas
+            if (currentlyPressedKeys[40]) {
+                if(this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbEntries()){
+                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() + 1);
+                    drawScene();
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
+                }
+            }
+
+            // Flèche du haut
+            if (currentlyPressedKeys[38]) {
+                if(this.menu.cursor.getPositionNumber() > 1){
+                    this.menu.cursor.setPositionNumber(this.menu.cursor.getPositionNumber() - 1);
+                    drawScene();
+                    wait(130); //On évite que l'action se déclenche plusieurs fois
+                }
+            }
+
+        }
+
+    }
+
     function mouseMove(event) {
-        // controle de la position du vaisseau en fonction de la souris
-        // la position est remappÃ©e entre -1 et 1 pour cela
+        // contrôle de la position du vaisseau en fonction de la souris
+        // la position est remappée entre -1 et 1 pour cela
         var newx = 2.0*(event.clientX/gl.viewportWidth)-1.0;
         var newy = -(2.0*(event.clientY/gl.viewportHeight)-1.0);
         spaceship.setPosition(newx,newy);
     }
 
 
-    // animation 
+    // animation
     var lastTime = 0;
     function animate() {
         var timeNow = new Date().getTime();
-        if (lastTime != 0) {
+        if (lastTime !== 0) {
             // chaque objet est susceptible de s'animer
             var elapsed = timeNow - lastTime;
             heightfield.setParameters(elapsed);
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
+
+            // Calcul de la nouvelle position des munitions afin qu'elles avancent
+            animateBullets(elapsed);
+
+            // Calcul de la nouvelle position des ennemis afin qu'ils avancent
+            animateEnnemies(elapsed);
         }
         lastTime = timeNow;
     }
 
+    function animateBullets(elapsed){
+        for(var i=0; i<bullets.length; i++){
+            bullets[i].setPosition(bullets[i].position[0], bullets[i].position[1] + 0.025);
+            bullets[i].setParameters(elapsed);
+        }
+    }
+
+    function animateEnnemies(elapsed){
+        for(var i=0; i<ennemies.length; i++){
+            ennemies[i].setPosition(ennemies[i].position[0], ennemies[i].position[1] - 0.01);
+            ennemies[i].setParameters(elapsed);
+        }
+    }
+
     function tick() {
-        requestAnimFrame(tick);
-        handleKeys();
-        drawScene();
-        animate();
+        var gameStatus = checkGameStatus();
+        if(gameStatus === "Normal") { // Vérification des stats du vaisseau et de la partie
+            requestAnimFrame(tick);
+            handleKeys();
+            drawScene();
+            animate();
+            fire();
+            spawnEnnemy();
+            checkCollisions();
+        } else if(gameStatus === "Ended"){
+
+        } else if(gameStatus === "Paused"){
+            requestAnimFrame(tick);
+            handleKeys();
+        }
+    }
+
+    function checkGameStatus(){
+        // On met à jour l'affichage des stats dans la barre
+        document.getElementById("stats_hp").innerText = spaceship.getHp();
+        document.getElementById("stats_score").innerText = game.getScore();
+
+        if(game.isPaused()){
+            return "Paused";
+        }
+
+        if(spaceship.getHp() <= 0){
+            game.end();
+            return "Ended";
+        }
+
+        return "Normal";
+    }
+
+    function checkCollisions(){
+    //----- On traite les collisions entre les projectiles et les ennemis -----//
+        // Pour chaque projectile
+        for(var i=0; i<bullets.length; i++){
+            var bulletX = bullets[i].position[0];
+            var bulletY = bullets[i].position[1];
+
+            // Pour chaque ennemi
+            for(var j=0; j<ennemies.length; j++){
+                var ennemyX = ennemies[j].position[0];
+                var ennemyY = ennemies[j].position[1];
+
+                // Si le projectile est suffisamment proche de l'ennemi, il lui inflige des dégâts
+                if(bulletX - ennemyX < 0.15 && bulletX - ennemyX > -0.15 && bulletY - ennemyY < 0.1 && bulletY - ennemyY > - 0.1){
+                    // L'ennemi perd de la vie
+                    ennemies[j].setHp(ennemies[j].getHp() - spaceship.getDamages());
+
+                    // Le projectile est détruit
+                    bullets.splice(bullets.indexOf(bullets[i]), 1);
+                }
+            }
+        }
+
+    //----- On traite les collisions entre les ennemis et le vaisseau -----//
+        var spaceshipX = spaceship.position[0];
+        var spaceshipY = spaceship.position[1];
+
+        // Pour chaque ennemi
+        for(var k=0; k<ennemies.length; k++){
+            ennemyX = ennemies[k].position[0];
+            ennemyY = ennemies[k].position[1];
+
+            // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
+            if(spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > - 0.1){
+                // Le vaisseau perd de la vie
+                spaceship.setHp(spaceship.getHp() - 1);
+
+                // L'ennemi est détruit
+                ennemies.splice(ennemies.indexOf(ennemies[k]), 1);
+            }
+        }
+    }
+
+    var fireDelay = 225; // Compteur afin de gérer la fréquence des tirs
+    function fire() {
+        if(fireDelay > 0) fireDelay--;
+        else{
+            bullet = new Bullet();
+            bullet.setPosition(spaceship.position[0], spaceship.position[1]+0.2);
+            bullets.push(bullet);
+            fireDelay = 12;
+        }
+    }
+
+
+    var ennemySpawnDelay = 200;
+    var randomX;
+    var nbSpawnedEnnemies = 0;
+    function spawnEnnemy(){
+        if(ennemySpawnDelay > 0) ennemySpawnDelay--;
+        else{
+            ennemy = new Ennemy();
+            nbSpawnedEnnemies++;
+
+            // On génère une valeur aléatoire pour la position de départ de l'ennemi
+            randomX = parseFloat(Math.min(-1 + (Math.random() * (1 - -1)),1).toFixed(2));
+
+            ennemy.setPosition(randomX,1);
+            ennemies.push(ennemy);
+
+            ennemySpawnDelay = ennemySpawnDelay = 50-(nbSpawnedEnnemies*0.15);
+            if(ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
+        }
     }
 
 
@@ -271,23 +770,55 @@ void main(void) {
         initHeightfieldShader();
         initBackgroundShader();
         initSpaceshipShader();
+        initBulletShader();
+        initEnnemyShader();
+        initMenuShader();
+        initOptionsShader();
+        initCursorShader();
 
-        // init de tous les objets
+        // init de tous les sons
+        for(var i=0; i<10; i++){
+            bullet_contact_sounds.push(new Audio('sounds/bullet_contact.mp3'));
+            bullet_contact_sounds[i].volume = 0.2;
+        }
+
+        // Entités
+        spaceshipTexture = initTexture("images/final_sprites.png");
+        bulletTexture = initTexture("images/final_sprites.png");
+        ennemyTexture = initTexture("images/final_sprites.png");
+
+        // Menu
+        menuTexture = initTexture("images/menu/menu.png");
+        optionsTexture = initTexture("images/menu/options.png");
+        cursorTexture = initTexture("images/menu/cursor.png");
+
+        // init de tous les objets fixes
         heightfield = new Heightfield();
         background = new Background(fbo.texture(0));
+
         spaceship = new Spaceship();
+        bullet = new Bullet();
+        ennemy = new Ennemy();
+
+        game = new Game();
+
+        menu = new Menu();
+        menu.setCursor(new Cursor());
+
+        options = new Options();
+        options.setCursor(new Cursor());
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-        // active le teste de profondeur 
+        // active le test de profondeur
         gl.enable(gl.DEPTH_TEST);
 
         /* Mouse and keyboard interaction functions */
         //canvas.addEventListener('mousedown', tbMouseDown, true);
         canvas.addEventListener('mousemove', mouseMove, true);
-        //canvas.addEventListener('mouseup', tbMouseUp, true);    
-        
+        //canvas.addEventListener('mouseup', tbMouseUp, true);
+
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
 
@@ -303,5 +834,11 @@ void main(void) {
 
 
 <body onload="webGLStart();">
-    <canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
+    <div class="center">
+        <canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
+        <div id="statsBar" style="background-color: skyblue; width: 780px; height:25px; text-align: right; padding: 0 10px;">
+            Score : <span id="stats_score">0</span> |
+            HP : <span id="stats_hp">5</span>
+        </div>
+    </div>
 </body></html>
