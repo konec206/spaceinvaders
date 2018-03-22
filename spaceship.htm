@@ -13,8 +13,9 @@
     <script type="text/javascript" src="entities/bullet.js"></script>
     <script type="text/javascript" src="entities/ennemies/green_ennemy.js"></script>
     <script type="text/javascript" src="entities/game.js"></script>
-    <script type="text/javascript" src="entities/menu.js"></script>
-    <script type="text/javascript" src="entities/options.js"></script>
+    <script type="text/javascript" src="entities/menus/mainMenu.js"></script>
+    <script type="text/javascript" src="entities/menus/menu.js"></script>
+    <script type="text/javascript" src="entities/menus/options.js"></script>
     <script type="text/javascript" src="entities/cursor.js"></script>
 
 
@@ -346,6 +347,38 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
     </script>
 
+    <script id="mainMenu-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+
+    </script>
+    <script id="mainMenu-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+// couleur par défaut des munitions
+gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+
+    </script>
+
     <script type="text/javascript">
 
         //----- BACKGROUND -----//
@@ -358,6 +391,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         var game; // Données et fonctions de la partie
         var cursorTexture;
         var cursorLeftTexture;
+
+        var mainMenu;
+        var mainMenuTexture;
 
         var menu;
         var menuTexture;
@@ -392,7 +428,22 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // active le FBO (a partie de la, on dessine dans la texture associée)
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.id());
 
-            if (game.isPaused()) {
+            // Si la partie n'a pas démarré, on affiche le menu principal
+            if(this.game.isStarted() === false){
+                // dessin du heightfield
+                drawHeightfield();
+
+                // désactivation du FBO (on dessine sur l'ecran maintenant)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+                // dessin du background (utilise la texture dessinée précédemment)
+                drawBackground();
+
+                // On affiche le menu principal et le curseur
+                drawMainMenuCursor();
+                drawMainMenu();
+            }
+            else if (game.isPaused()) {
                 // désactivation du FBO (on dessine sur l'ecran maintenant)
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -449,6 +500,26 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
             options.cursor.sendUniformVariables();
             options.cursor.draw();
+        }
+
+        function drawMainMenu() {
+            gl.useProgram(mainMenu.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, mainMenuTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(mainMenu.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+            mainMenu.sendUniformVariables();
+            mainMenu.draw();
+        }
+
+        function drawMainMenuCursor() {
+            gl.useProgram(mainMenu.cursor.shader());
+            gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+            gl.bindTexture(gl.TEXTURE_2D, cursorTexture); // on place maTexture dans l'unité active
+            gl.uniform1i(mainMenu.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+            mainMenu.cursor.sendUniformVariables();
+            mainMenu.cursor.draw();
         }
 
         function drawMenu() {
@@ -555,7 +626,6 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             currentlyPressedKeys[event.keyCode] = true;
         }
 
-
         function handleKeyUp(event) {
             currentlyPressedKeys[event.keyCode] = false;
         }
@@ -569,114 +639,156 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         }
 
         function handleKeys() {
-            if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
-                // Touche p
-                this.game.pause();
-                if (this.menu.cursor === null) this.menu.cursor = this.cursor;
-                this.menu.cursor.setPositionNumber("Menu", 1);
-                wait(300);  //On évite que l'action se déclenche plusieurs fois
-            }
 
-            // Contrôles du menu
-            if (this.game.isPaused()) {
+            if(this.game.isStarted() === false) {
+                // On est dans le menu principal
 
-                // MENU
-                if (this.game.isOptions() === false) {
-                    // Sélection d'une entrée du menu
-                    if (currentlyPressedKeys[13]) {
-                        var entry = this.menu.cursor.getPositionNumber();
+                // Sélection d'une entrée du menu
+                if (currentlyPressedKeys[13]) {
+                    var entry = this.menu.cursor.getPositionNumber();
 
-                        // Resume
-                        if (entry === 1) {
-                            this.game.pause();
-                        }
-                        // Options
-                        else if (entry === 2) {
-                            // Activation des options
-                            this.game.options();
-                            drawScene();
-                            wait(130); //On évite que l'action se déclenche plusieurs fois
-                        }
-                        else if (entry === 3) {
-
-                        }
+                    // Resume
+                    if (entry === 1) {
+                        this.game.start();
                     }
+                    // Affichage des meilleurs scores
+                    else if (entry === 2) {
 
-                    // Flèche du bas
-                    if (currentlyPressedKeys[40]) {
-                        if (this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbLines()) {
-                            this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() + 1);
-                            drawScene();
-                            wait(130); //On évite que l'action se déclenche plusieurs fois
-                        }
                     }
+                    // Affichage des crédits
+                    else if (entry === 3) {
 
-                    // Flèche du haut
-                    if (currentlyPressedKeys[38]) {
-                        if (this.menu.cursor.getPositionNumber() > 1) {
-                            this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() - 1);
-                            drawScene();
-                            wait(130); //On évite que l'action se déclenche plusieurs fois
-                        }
                     }
                 }
-                // OPTIONS
-                else {
-                    // Sélection d'une entrée du menu
-                    var entry = this.options.cursor.getPositionNumber();
-                    var line = entry % 10;
-                    console.log(line);
 
-                    //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
-                    // Flèche du bas
-                    if (currentlyPressedKeys[40]) {
-                        if (line < this.options.cursor.getNbLines()) {
-                            line = (line + 1) * 10 + 1;
-                            this.options.cursor.setPositionNumber("Options", line);
-                            drawScene();
-                            wait(130); //On évite que l'action se déclenche plusieurs fois
+                // Flèche du bas
+                if (currentlyPressedKeys[40]) {
+                    if (this.mainMenu.cursor.getPositionNumber() < this.mainMenu.cursor.getNbLines()) {
+                        this.mainMenu.cursor.setPositionNumber("MainMenu", this.mainMenu.cursor.getPositionNumber() + 1);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                    }
+                }
+
+                // Flèche du haut
+                if (currentlyPressedKeys[38]) {
+                    if (this.mainMenu.cursor.getPositionNumber() > 1) {
+                        this.mainMenu.cursor.setPositionNumber("MainMenu", this.mainMenu.cursor.getPositionNumber() - 1);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                    }
+                }
+            }
+            else {
+                if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
+                    // Touche p
+                    this.game.pause();
+                    if (this.menu.cursor === null) this.menu.cursor = this.cursor;
+                    this.menu.cursor.setPositionNumber("Menu", 1);
+                    wait(300);  //On évite que l'action se déclenche plusieurs fois
+                }
+
+                // Contrôles du menu
+                if (this.game.isPaused()) {
+
+                    // MENU
+                    if (this.game.isOptions() === false) {
+                        // Sélection d'une entrée du menu
+                        if (currentlyPressedKeys[13]) {
+                            var entry = this.menu.cursor.getPositionNumber();
+
+                            // Resume
+                            if (entry === 1) {
+                                this.game.pause();
+                            }
+                            // Options
+                            else if (entry === 2) {
+                                // Activation des options
+                                this.game.options();
+                                drawScene();
+                                wait(130); //On évite que l'action se déclenche plusieurs fois
+                            }
+                            else if (entry === 3) {
+
+                            }
+                        }
+
+                        // Flèche du bas
+                        if (currentlyPressedKeys[40]) {
+                            if (this.menu.cursor.getPositionNumber() < this.menu.cursor.getNbLines()) {
+                                this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() + 1);
+                                drawScene();
+                                wait(130); //On évite que l'action se déclenche plusieurs fois
+                            }
+                        }
+
+                        // Flèche du haut
+                        if (currentlyPressedKeys[38]) {
+                            if (this.menu.cursor.getPositionNumber() > 1) {
+                                this.menu.cursor.setPositionNumber("Menu", this.menu.cursor.getPositionNumber() - 1);
+                                drawScene();
+                                wait(130); //On évite que l'action se déclenche plusieurs fois
+                            }
                         }
                     }
+                    // OPTIONS
+                    else {
+                        // Sélection d'une entrée du menu
+                        var entry = this.options.cursor.getPositionNumber();
+                        var line = entry % 10;
+                        console.log(line);
 
-                    // Flèche du haut
-                    if (currentlyPressedKeys[38]) {
-                        if (line > 1) {
-                            line = (line + 1) * 10 + 1;
-                            this.options.cursor.setPositionNumber("Options", line);
-                            drawScene();
-                            wait(130); //On évite que l'action se déclenche plusieurs fois
-                        }
-                    }
-
-                    //----- DÉPLACEMENTS AU SEIN D'UNE LIGNE -----//
-                    // SOUNDS
-                    if(line === 1){
-                        // Flèche de droite
-                        if (currentlyPressedKeys[39]) {
-                            this.options.cursor.setPositionNumber("Options", 12);
-                            this.options.setSounds(true);
-
+                        //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
+                        // Flèche du bas
+                        if (currentlyPressedKeys[40]) {
+                            if (line < this.options.cursor.getNbLines()) {
+                                line = (line + 1) * 10 + 1;
+                                this.options.cursor.setPositionNumber("Options", line);
+                                drawScene();
+                                wait(130); //On évite que l'action se déclenche plusieurs fois
+                            }
                         }
 
-                        // Flèche de gauche
-                        if (currentlyPressedKeys[37]) {
-                            this.options.cursor.setPositionNumber("Options", 11);
-                            this.options.setSounds(false);
-                        }
-                    }
-                    // LEVEL
-                    else if(line === 2){
-                        // Flèche de droite
-                        if (currentlyPressedKeys[39]) {
-                            this.options.cursor.setPositionNumber("Options", 22);
-                            this.options.setLevel(2);
-
+                        // Flèche du haut
+                        if (currentlyPressedKeys[38]) {
+                            if (line > 1) {
+                                line = (line + 1) * 10 + 1;
+                                this.options.cursor.setPositionNumber("Options", line);
+                                drawScene();
+                                wait(130); //On évite que l'action se déclenche plusieurs fois
+                            }
                         }
 
-                        // Flèche de gauche
-                        if (currentlyPressedKeys[37]) {
-                            this.options.cursor.setPositionNumber("Options", 21);
-                            this.options.setLevel(1);
+                        //----- DÉPLACEMENTS AU SEIN D'UNE LIGNE -----//
+                        // SOUNDS
+                        if(line === 1){
+                            // Flèche de droite
+                            if (currentlyPressedKeys[39]) {
+                                this.options.cursor.setPositionNumber("Options", 12);
+                                this.options.setSounds(true);
+
+                            }
+
+                            // Flèche de gauche
+                            if (currentlyPressedKeys[37]) {
+                                this.options.cursor.setPositionNumber("Options", 11);
+                                this.options.setSounds(false);
+                            }
+                        }
+                        // LEVEL
+                        else if(line === 2){
+                            // Flèche de droite
+                            if (currentlyPressedKeys[39]) {
+                                this.options.cursor.setPositionNumber("Options", 22);
+                                this.options.setLevel(2);
+
+                            }
+
+                            // Flèche de gauche
+                            if (currentlyPressedKeys[37]) {
+                                this.options.cursor.setPositionNumber("Options", 21);
+                                this.options.setLevel(1);
+                            }
                         }
                     }
                 }
@@ -757,20 +869,26 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         }
 
         function tick() {
+            drawScene();
             var gameStatus = checkGameStatus();
             if (gameStatus === "Normal") { // Vérification des stats du vaisseau et de la partie
                 requestAnimFrame(tick);
                 handleKeys();
-                drawScene();
                 animate();
                 fire();
                 spawnEnnemy();
                 checkCollisions();
-            } else if (gameStatus === "Ended") {
-
-            } else if (gameStatus === "Paused") {
+            }
+            else if (gameStatus === "MainMenu"){
                 requestAnimFrame(tick);
                 handleKeys();
+            }
+            else if (gameStatus === "Paused") {
+                requestAnimFrame(tick);
+                handleKeys();
+            }
+            else if (gameStatus === "Ended") {
+
             }
         }
 
@@ -779,16 +897,21 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             document.getElementById("stats_hp").innerText = spaceship.getHp();
             document.getElementById("stats_score").innerText = game.getScore();
 
-            if (game.isPaused()) {
-                return "Paused";
+            if (game.isStarted() === false){
+                return "MainMenu";
             }
+            else{
+                if (game.isPaused()) {
+                    return "Paused";
+                }
 
-            if (spaceship.getHp() <= 0) {
-                game.end();
-                return "Ended";
+                if (spaceship.getHp() <= 0) {
+                    game.end();
+                    return "Ended";
+                }
+
+                return "Normal";
             }
-
-            return "Normal";
         }
 
         function checkCollisions() {
@@ -878,9 +1001,12 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // init de tous les shaders
             initHeightfieldShader();
             initBackgroundShader();
+
             initSpaceshipShader();
             initBulletShader();
             initEnnemyShader();
+
+            initMainMenuShader();
             initMenuShader();
             initOptionsShader();
             initCursorShader();
@@ -896,7 +1022,10 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             bulletTexture = initTexture("images/final_sprites.png");
             ennemyTexture = initTexture("images/final_sprites.png");
 
-            // Menu
+            // Main Menu
+            mainMenuTexture = initTexture("images/menu/main_menu.png");
+
+            // Game Menu
             menuTexture = initTexture("images/menu/menu.png");
             optionsTexture = initTexture("images/menu/options.png");
             cursorTexture = initTexture("images/menu/cursor.png");
@@ -911,6 +1040,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             ennemy = new Green_Ennemy();
 
             game = new Game();
+
+            mainMenu = new MainMenu();
+            mainMenu.setCursor(new Cursor(4));
 
             menu = new Menu();
             menu.setCursor(new Cursor(3));
