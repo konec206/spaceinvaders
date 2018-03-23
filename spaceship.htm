@@ -428,8 +428,19 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // active le FBO (a partie de la, on dessine dans la texture associée)
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.id());
 
+            // On est dans les options
+            if (game.isOptions()) {
+                // désactivation du FBO (on dessine sur l'ecran maintenant)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+                // dessin du background (utilise la texture dessinée précédemment)
+                drawBackground();
+
+                drawOptionsCursor();
+                drawOptions();
+            }
             // Si la partie n'a pas démarré, on affiche le menu principal
-            if(this.game.isStarted() === false){
+            else if(this.game.isStarted() === false){
                 // dessin du heightfield
                 drawHeightfield();
 
@@ -450,16 +461,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 // dessin du background (utilise la texture dessinée précédemment)
                 drawBackground();
 
-                if (game.isOptions() === false) {
-                    // On affiche l'image du menu et le curseur
-                    drawMenuCursor();
-                    drawMenu();
-                }
-                else {
-                    // On est dans les options
-                    drawOptionsCursor();
-                    drawOptions();
-                }
+                // On affiche l'image du menu et le curseur
+                drawMenuCursor();
+                drawMenu();
             }
             else {
                 // dessin du heightfield
@@ -655,8 +659,45 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
         function handleKeys() {
 
+            // OPTIONS
+            if(this.game.isOptions()) {
+                // Sélection d'une entrée du menu
+                var entry = this.options.cursor.getPositionNumber();
+                var line = entry % 10;
+                console.log(line);
+
+                //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
+                // Flèche du bas
+                if (currentlyPressedKeys[40]) {
+                    if (line < this.options.cursor.getNbLines()) {
+                        line = (line + 1) * 10 + 1;
+                        this.options.cursor.setPositionNumber("Options", line);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                    }
+                }
+
+                // Flèche du haut
+                if (currentlyPressedKeys[38]) {
+                    if (line > 1) {
+                        line = (line + 1) * 10 + 1;
+                        this.options.cursor.setPositionNumber("Options", line);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                    }
+                }
+
+                // Échap
+                if (currentlyPressedKeys[27]){
+                    this.game.options();
+
+                    if(this.game.isStarted()){
+                        this.game.pause();
+                    }
+                }
+            }
             // On est dans le menu principal
-            if(this.game.isStarted() === false) {
+            else if(this.game.isStarted() === false) {
 
                 // Sélection d'une entrée du menu
                 if (currentlyPressedKeys[13]) {
@@ -752,33 +793,6 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                             }
                         }
                     }
-                    // OPTIONS
-                    else {
-                        // Sélection d'une entrée du menu
-                        var entry = this.options.cursor.getPositionNumber();
-                        var line = entry % 10;
-                        console.log(line);
-
-                        //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
-                        // Flèche du bas
-                        if (currentlyPressedKeys[40]) {
-                            if (line < this.options.cursor.getNbLines()) {
-                                line = (line + 1) * 10 + 1;
-                                this.options.cursor.setPositionNumber("Options", line);
-                                drawScene();
-                                wait(130); //On évite que l'action se déclenche plusieurs fois
-                            }
-                        }
-
-                        // Flèche du haut
-                        if (currentlyPressedKeys[38]) {
-                            if (line > 1) {
-                                line = (line + 1) * 10 + 1;
-                                this.options.cursor.setPositionNumber("Options", line);
-                                drawScene();
-                                wait(130); //On évite que l'action se déclenche plusieurs fois
-                            }
-                        }
 
                         //----- DÉPLACEMENTS AU SEIN D'UNE LIGNE -----//
                         // SOUNDS
@@ -812,7 +826,6 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                             }
                         }
                     }
-                }
             }
         }
 
