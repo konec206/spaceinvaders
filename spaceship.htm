@@ -649,7 +649,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
                     // Resume
                     if (entry === 1) {
-                        this.game.start();
+                        this.game.startGame();
                     }
                     // Affichage des meilleurs scores
                     else if (entry === 2) {
@@ -676,6 +676,13 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                         this.mainMenu.cursor.setPositionNumber("MainMenu", this.mainMenu.cursor.getPositionNumber() - 1);
                         drawScene();
                         wait(130); //On évite que l'action se déclenche plusieurs fois
+                    }
+                }
+
+                if (currentlyPressedKeys[13]) {
+                    console.log("test");
+                    if (this.mainMenu.getPositionNumber() === 1 ) {
+                        this.game.startGame();
                     }
                 }
             }
