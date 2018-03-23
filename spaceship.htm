@@ -638,25 +638,45 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
+        function resetGame(){
+            this.game = new Game();
+            console.log(this.game);
+
+            this.mainMenu = new MainMenu();
+            this.mainMenu.setCursor(new Cursor(4));
+
+            this.menu = new Menu();
+            this.menu.setCursor(new Cursor(3));
+
+            green_ennemies = [];
+            bullets = [];
+            spaceship = new Spaceship();
+        }
+
         function handleKeys() {
 
+            // On est dans le menu principal
             if(this.game.isStarted() === false) {
-                // On est dans le menu principal
 
                 // Sélection d'une entrée du menu
                 if (currentlyPressedKeys[13]) {
-                    var entry = this.menu.cursor.getPositionNumber();
+                    var entry = this.mainMenu.cursor.getPositionNumber();
 
-                    // Resume
+                    // Start Game
                     if (entry === 1) {
                         this.game.startGame();
+                        wait(100);
+                    }
+                    // Affichage des options
+                    else if (entry === 2) {
+                        this.game.options();
                     }
                     // Affichage des meilleurs scores
-                    else if (entry === 2) {
+                    else if (entry === 3) {
 
                     }
                     // Affichage des crédits
-                    else if (entry === 3) {
+                    else if (entry === 4) {
 
                     }
                 }
@@ -678,13 +698,6 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                         wait(130); //On évite que l'action se déclenche plusieurs fois
                     }
                 }
-
-                if (currentlyPressedKeys[13]) {
-                    console.log("test");
-                    if (this.mainMenu.getPositionNumber() === 1 ) {
-                        this.game.startGame();
-                    }
-                }
             }
             else {
                 if (currentlyPressedKeys[80] || currentlyPressedKeys[27]) {
@@ -695,7 +708,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     wait(300);  //On évite que l'action se déclenche plusieurs fois
                 }
 
-                // Contrôles du menu
+                // Contrôles du menu Pause
                 if (this.game.isPaused()) {
 
                     // MENU
@@ -715,8 +728,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                                 drawScene();
                                 wait(130); //On évite que l'action se déclenche plusieurs fois
                             }
+                            // Exit, retour au menu principal
                             else if (entry === 3) {
-
+                                resetGame();
                             }
                         }
 

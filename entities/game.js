@@ -19,7 +19,7 @@ Game.prototype.setScore = function (newScore) {
 };
 
 Game.prototype.startGame = function () {
-    this.started = true;
+    this.started = !this.started;
 };
 
 Game.prototype.isStarted = function () {
