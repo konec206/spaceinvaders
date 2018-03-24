@@ -1087,10 +1087,13 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             var spaceshipX = spaceship.position[0];
             var spaceshipY = spaceship.position[1];
 
-            // Pour chaque ennemi
-            for (var k = 0; k < green_ennemies.length; k++) {
-                ennemyX = green_ennemies[k].position[0];
-                ennemyY = green_ennemies[k].position[1];
+            var ennemyX;
+            var ennemyY;
+
+            // Pour chaque ennemi vert
+            for (var i = 0; i < green_ennemies.length; i++) {
+                ennemyX = green_ennemies[i].position[0];
+                ennemyY = green_ennemies[i].position[1];
 
                 // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
                 if (spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > -0.1) {
@@ -1098,7 +1101,22 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     spaceship.setHp(spaceship.getHp() - 1);
 
                     // L'ennemi est détruit
-                    green_ennemies.splice(green_ennemies.indexOf(green_ennemies[k]), 1);
+                    green_ennemies.splice(green_ennemies.indexOf(green_ennemies[i]), 1);
+                }
+            }
+
+            // Pour chaque ennemi jaune
+            for (var j = 0; j < yellow_ennemies.length; j++) {
+                ennemyX = yellow_ennemies[j].position[0];
+                ennemyY = yellow_ennemies[j].position[1];
+
+                // Si l'ennemi est suffisamment proche du vaisseau, il lui inflige des dégâts et est détruit
+                if (spaceshipX - ennemyX < 0.15 && spaceshipX - ennemyX > -0.15 && spaceshipY - ennemyY < 0.1 && spaceshipY - ennemyY > -0.1) {
+                    // Le vaisseau perd de la vie
+                    spaceship.setHp(spaceship.getHp() - 1);
+
+                    // L'ennemi est détruit
+                    yellow_ennemies.splice(yellow_ennemies.indexOf(yellow_ennemies[j]), 1);
                 }
             }
         }
