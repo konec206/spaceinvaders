@@ -624,8 +624,10 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 else {
                     // Sélection d'une entrée du menu
                     var entry = this.options.cursor.getPositionNumber();
-                    var line = entry % 10;
-                    console.log(line);
+                    var line =  Math.floor(entry / 10);
+
+                    if (isNaN(line))
+                        line = 1;
 
                     //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
                     // Flèche du bas
@@ -641,12 +643,13 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     // Flèche du haut
                     if (currentlyPressedKeys[38]) {
                         if (line > 1) {
-                            line = (line + 1) * 10 + 1;
+                            line = (line - 1) * 10 + 1;
                             this.options.cursor.setPositionNumber("Options", line);
                             drawScene();
                             wait(130); //On évite que l'action se déclenche plusieurs fois
                         }
                     }
+
 
                     //----- DÉPLACEMENTS AU SEIN D'UNE LIGNE -----//
                     // SOUNDS
@@ -654,14 +657,33 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                         // Flèche de droite
                         if (currentlyPressedKeys[39]) {
                             this.options.cursor.setPositionNumber("Options", 12);
-                            this.options.setSounds(true);
-
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
                         }
 
                         // Flèche de gauche
                         if (currentlyPressedKeys[37]) {
                             this.options.cursor.setPositionNumber("Options", 11);
-                            this.options.setSounds(false);
+                            drawScene();
+                            if (currentlyPressedKeys[13]) {
+                                this.options.setSounds(false);
+                                alert("Sounds are off");
+                            }
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
+
+                        }
+
+                        //Enter
+                        if (currentlyPressedKeys[13]) {
+                            if (this.options.cursor.getPositionNumber() === 11) {
+                                this.options.setSounds(true);
+                                alert("Sounds are on");
+                            } else if (this.options.cursor.getPositionNumber() === 12) {
+                                this.options.setSounds(false);
+                                alert("Sounds are off");
+                            }
+                            currentlyPressedKeys[13] = null;
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
                         }
                     }
                     // LEVEL
@@ -670,13 +692,16 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                         if (currentlyPressedKeys[39]) {
                             this.options.cursor.setPositionNumber("Options", 22);
                             this.options.setLevel(2);
-
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
                         }
 
                         // Flèche de gauche
                         if (currentlyPressedKeys[37]) {
                             this.options.cursor.setPositionNumber("Options", 21);
                             this.options.setLevel(1);
+                            drawScene();
+                            wait(130); //On évite que l'action se déclenche plusieurs fois
                         }
                     }
                 }
@@ -885,10 +910,10 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             game = new Game();
 
             menu = new Menu();
-            menu.setCursor(new Cursor(3));
+            menu.setCursor(new Cursor(3, "Menu"));
 
             options = new Options();
-            options.setCursor(new Cursor(4));
+            options.setCursor(new Cursor(4, "Options"));
 
             // la couleur de fond sera noire
             gl.clearColor(0.0, 0.0, 0.0, 1.0);

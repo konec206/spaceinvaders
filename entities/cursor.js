@@ -19,8 +19,8 @@ function initCursorShader() {
     cursorShader.maTextureUniform = gl.getUniformLocation(cursorShader, "uMaTexture");
 }
 
-function Cursor(nbLines) {
-    this.initParameters(nbLines);
+function Cursor(nbLines, menuType) {
+    this.initParameters(nbLines, menuType);
 
     // cree un nouveau buffer sur le GPU et l'active
     this.vertexBuffer = gl.createBuffer();
@@ -65,11 +65,11 @@ function Cursor(nbLines) {
     this.triangles.numItems = 6;
 }
 
-Cursor.prototype.initParameters = function (nbLines) {
+Cursor.prototype.initParameters = function (nbLines, menuType) {
     this.width = 0.2;
     this.height = 0.2;
     this.setPosition(-0.5, 0.1);
-    this.positionNumber = 1;
+    this.positionNumber = this.setPositionNumber(menuType, -1);
     this.nbLines = nbLines;
 };
 
@@ -109,18 +109,18 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
 
         //Première ligne (Audio)
         if (this.getPositionNumber() === 11) { // ON
-            this.setPosition(-0.2, 0.0);
+            this.setPosition(-0.05, 0.19);
         }
         else if (this.getPositionNumber() === 12) { // OFF
-            this.setPosition(0.7, 0.0);
+            this.setPosition(0.75, 0.19);
         }
 
         //Deuxième ligne (Level)
         else if (this.getPositionNumber() === 21) {
-            this.setPosition(-0.2, -0.2);
+            this.setPosition(-0.25, -0.03);
         }
         else if(this.getPositionNumber() === 22) {
-            this.setPosition(0.8, -0.2);
+            this.setPosition(0.90, -0.03);
         }
 
         //Troisième ligne (Skin)
