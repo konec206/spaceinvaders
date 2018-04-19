@@ -4,6 +4,7 @@ function Game() {
 
 Game.prototype.initParameters = function () {
     this.score = 0;
+    this.started = false;
     this.paused = false;
     this.ended = false;
     this.inOptions = false;
@@ -15,6 +16,14 @@ Game.prototype.addScore = function (scoreToAdd) {
 
 Game.prototype.setScore = function (newScore) {
     this.score = newScore;
+};
+
+Game.prototype.startGame = function () {
+    this.started = !this.started;
+};
+
+Game.prototype.isStarted = function () {
+    return this.started;
 };
 
 Game.prototype.getScore = function () {

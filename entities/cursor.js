@@ -93,7 +93,22 @@ Cursor.prototype.getNbLines = function () {
 Cursor.prototype.setPositionNumber = function (menuType, nb) {
     this.positionNumber = nb;
 
-    if (menuType === "Menu") {
+    if(menuType === "MainMenu"){
+        if (this.positionNumber === 1) {
+            this.setPosition(-0.5, 0.12);
+        }
+        else if (this.positionNumber === 2) {
+            this.setPosition(-0.5, -0.12);
+        }
+        else if (this.positionNumber === 3) {
+            this.setPosition(-0.5, -0.38);
+        }
+        else if (this.positionNumber === 4) {
+            this.setPosition(-0.5, -0.65);
+        }
+        else this.setPositionNumber("MainMenu", 1); // Si la valeur est incorrecte, on replace le curseur sur la première position
+    }
+    else if (menuType === "Menu") {
         if (this.positionNumber === 1) {
             this.setPosition(-0.5, 0.1);
         }

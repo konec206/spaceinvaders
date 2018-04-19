@@ -1,25 +1,25 @@
-var ennemyShader;
+var yellowEnnemyShader;
 
-function initGreenEnnemyShader() {
-    ennemyShader = initShaders("green_ennemy-vs","green_ennemy-fs");
+function initYellowEnnemyShader() {
+    yellowEnnemyShader = initShaders("yellow_ennemy-vs","yellow_ennemy-fs");
 
     // active ce shader
-    gl.useProgram(ennemyShader);
+    gl.useProgram(yellowEnnemyShader);
 
     // récupère la localisation de l'attribut dans lequel on souhaite accéder aux positions
-    ennemyShader.vertexPositionAttribute = gl.getAttribLocation(ennemyShader, "aVertexPosition");
-    gl.enableVertexAttribArray(ennemyShader.vertexPositionAttribute); // active cet attribut
+    yellowEnnemyShader.vertexPositionAttribute = gl.getAttribLocation(yellowEnnemyShader, "aVertexPosition");
+    gl.enableVertexAttribArray(yellowEnnemyShader.vertexPositionAttribute); // active cet attribut
 
     // pareil pour les coordonnées de texture
-    ennemyShader.vertexCoordAttribute = gl.getAttribLocation(ennemyShader, "aVertexCoord");
-    gl.enableVertexAttribArray(ennemyShader.vertexCoordAttribute);
+    yellowEnnemyShader.vertexCoordAttribute = gl.getAttribLocation(yellowEnnemyShader, "aVertexCoord");
+    gl.enableVertexAttribArray(yellowEnnemyShader.vertexCoordAttribute);
 
     // adresse de la variable uniforme uOffset dans le shader
-    ennemyShader.positionUniform = gl.getUniformLocation(ennemyShader, "uPosition");
-    ennemyShader.maTextureUniform = gl.getUniformLocation(ennemyShader, "uMaTexture");
+    yellowEnnemyShader.positionUniform = gl.getUniformLocation(yellowEnnemyShader, "uPosition");
+    yellowEnnemyShader.maTextureUniform = gl.getUniformLocation(yellowEnnemyShader, "uMaTexture");
 }
 
-function Green_Ennemy() {
+function Yellow_Ennemy() {
     this.initParameters();
 
     // cree un nouveau buffer sur le GPU et l'active
@@ -46,10 +46,10 @@ function Green_Ennemy() {
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-        0.525, 0.76,
-        0.635, 0.76,
-        0.635, 0.92,
-        0.525, 0.92
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0
     ];
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -65,76 +65,76 @@ function Green_Ennemy() {
     this.triangles.numItems = 6;
 }
 
-Green_Ennemy.prototype.initParameters = function() {
+Yellow_Ennemy.prototype.initParameters = function() {
     this.width = 0.2;
     this.height = 0.2;
     this.initialPosition = [0.0, 0.0];
     this.direction = 0; // 0 vers la gauche, 1 vers la droite
     this.position = [0.0,-0.7];
-    this.hp = 100;
-    this.worth = 20; // Valeur de l'ennemi sur le score, lorsqu'il est tué
+    this.hp = 150;
+    this.worth = 30; // Valeur de l'ennemi sur le score, lorsqu'il est tué
 };
 
-Green_Ennemy.prototype.getWorth = function(){
+Yellow_Ennemy.prototype.getWorth = function(){
     return this.worth;
 };
 
-Green_Ennemy.prototype.setDirection = function(direction){
+Yellow_Ennemy.prototype.setDirection = function(direction){
     this.direction = direction;
 };
 
-Green_Ennemy.prototype.getDirection = function() {
+Yellow_Ennemy.prototype.getDirection = function() {
     return this.direction;
 }
 
-Green_Ennemy.prototype.setParameters = function(elapsed) {
+Yellow_Ennemy.prototype.setParameters = function(elapsed) {
     // on pourrait animer des choses ici
 
 };
 
-Green_Ennemy.prototype.setInitialPosition = function(x, y){
+Yellow_Ennemy.prototype.setInitialPosition = function(x, y){
     this.initialPosition = [x, y];
     this.setPosition(x, y);
 };
 
-Green_Ennemy.prototype.getInitialPosition = function() {
+Yellow_Ennemy.prototype.getInitialPosition = function() {
     return this.initialPosition;
 };
 
-Green_Ennemy.prototype.setPosition = function(x, y) {
+Yellow_Ennemy.prototype.setPosition = function(x, y) {
     this.position = [x,y];
 };
 
 
-Green_Ennemy.prototype.isAlive = function(){
+Yellow_Ennemy.prototype.isAlive = function(){
     return this.hp > 0;
 };
 
 
-Green_Ennemy.prototype.setHp = function(newHpValue){
+Yellow_Ennemy.prototype.setHp = function(newHpValue){
     this.hp = newHpValue;
 };
 
-Green_Ennemy.prototype.getHp = function(){
+Yellow_Ennemy.prototype.getHp = function(){
     return this.hp;
 };
 
-Green_Ennemy.prototype.shader = function() {
-    return ennemyShader;
+Yellow_Ennemy.prototype.shader = function() {
+    return yellowEnnemyShader;
 };
 
-Green_Ennemy.prototype.sendUniformVariables = function() {
-    gl.uniform2fv(ennemyShader.positionUniform,this.position);
+Yellow_Ennemy.prototype.sendUniformVariables = function() {
+    gl.uniform2fv(yellowEnnemyShader.positionUniform,this.position);
 };
 
-Green_Ennemy.prototype.draw = function() {
+Yellow_Ennemy.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.vertexAttribPointer(ennemyShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(yellowEnnemyShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // active le buffer de coords
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
-    gl.vertexAttribPointer(ennemyShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(yellowEnnemyShader.vertexCoordAttribute, this.coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // dessine les buffers actifs
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triangles);
