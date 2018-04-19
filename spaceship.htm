@@ -749,10 +749,10 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             console.log(this.game);
 
             this.mainMenu = new MainMenu();
-            this.mainMenu.setCursor(new Cursor(4));
+            this.mainMenu.setCursor(new Cursor(4, 'MainMenu'));
 
             this.menu = new Menu();
-            this.menu.setCursor(new Cursor(3));
+            this.menu.setCursor(new Cursor(3, 'Menu'));
 
             green_ennemies = [];
             yellow_ennemies = [];
@@ -766,27 +766,54 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             if (this.game.isOptions()) {
                 // Sélection d'une entrée du menu
                 var entry = this.options.cursor.getPositionNumber();
-                var line = entry % 10;
-                console.log(line);
+                if(entry === 1) entry = 11;
+                var line = Math.round(entry / 10);
+                var choice = entry % 10;
 
                 //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
                 // Flèche du bas
                 if (currentlyPressedKeys[40]) {
-                    if (line < this.options.cursor.getNbLines()) {
-                        line = (line + 1) * 10 + 1;
-                        this.options.cursor.setPositionNumber("Options", line);
+                    if (entry <= this.options.cursor.getNbLines() * 10) {
+                        entry = entry + 10;
+                        line++;
+                        this.options.cursor.setPositionNumber("Options", entry);
                         drawScene();
                         wait(130); //On évite que l'action se déclenche plusieurs fois
+                        console.log(entry);
                     }
                 }
 
                 // Flèche du haut
                 if (currentlyPressedKeys[38]) {
-                    if (line > 1) {
-                        line = (line + 1) * 10 + 1;
-                        this.options.cursor.setPositionNumber("Options", line);
+                    if (entry > 20) {
+                        entry = entry - 10;
+                        line--;
+                        this.options.cursor.setPositionNumber("Options", entry);
                         drawScene();
                         wait(130); //On évite que l'action se déclenche plusieurs fois
+                        console.log(entry);
+                    }
+                }
+
+                // Flèche de gauche
+                if (currentlyPressedKeys[37]) {
+                    if (line !== this.options.cursor.getNbLines() && choice === 2) {  // 2 choix par ligne, sauf pour la dernière (save)
+                        entry--;
+                        this.options.cursor.setPositionNumber("Options", entry);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                        console.log(entry);
+                    }
+                }
+
+                // Flèche de droite
+                if (currentlyPressedKeys[39]) {
+                    if (line !== this.options.cursor.getNbLines() && choice === 1) {
+                        entry++;
+                        this.options.cursor.setPositionNumber("Options", entry);
+                        drawScene();
+                        wait(130); //On évite que l'action se déclenche plusieurs fois
+                        console.log(entry);
                     }
                 }
 
@@ -801,10 +828,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
             // On est dans le menu principal
             else if (this.game.isStarted() === false) {
-
                 // Sélection d'une entrée du menu
                 if (currentlyPressedKeys[13]) {
-                    var entry = this.mainMenu.cursor.getPositionNumber();
+                    var entry = this.mainMenu.getCursor().getPositionNumber();
 
                     // Start Game
                     if (entry === 1) {
@@ -1304,7 +1330,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             game = new Game();
 
             mainMenu = new MainMenu();
-            mainMenu.setCursor(new Cursor(4));
+            mainMenu.setCursor(new Cursor(4, 'MainMenu'));
 
             menu = new Menu();
             menu.setCursor(new Cursor(3, "Menu"));

@@ -94,31 +94,29 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
     this.positionNumber = nb;
 
     if(menuType === "MainMenu"){
-        if (this.positionNumber === 1) {
+        if (nb === 1) {
             this.setPosition(-0.5, 0.12);
         }
-        else if (this.positionNumber === 2) {
+        else if (nb === 2) {
             this.setPosition(-0.5, -0.12);
         }
-        else if (this.positionNumber === 3) {
+        else if (nb === 3) {
             this.setPosition(-0.5, -0.38);
         }
-        else if (this.positionNumber === 4) {
+        else if (nb === 4) {
             this.setPosition(-0.5, -0.65);
         }
-        else this.setPositionNumber("MainMenu", 1); // Si la valeur est incorrecte, on replace le curseur sur la première position
     }
     else if (menuType === "Menu") {
-        if (this.positionNumber === 1) {
+        if (nb === 1) {
             this.setPosition(-0.5, 0.1);
         }
-        else if (this.positionNumber === 2) {
+        else if (nb === 2) {
             this.setPosition(-0.5, -0.18);
         }
-        else if (this.positionNumber === 3) {
+        else if (nb === 3) {
             this.setPosition(-0.35, -0.47);
         }
-        else this.setPositionNumber("Menu", 1); // Si la valeur est incorrecte, on replace le curseur sur la première position
     }
     else if (menuType === "Options") {
 
@@ -151,7 +149,7 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
 
         //Quatrième ligne (Save)
         else if (this.getPositionNumber() === 41) {
-            this.setPosition(-0.5, -0.8);
+            this.setPosition(-0.35, -0.7);
         }
         else if (this.getPositionNumber() === 42) {
             this.setPosition(0.2, -0.8);
@@ -164,7 +162,8 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
 };
 
 Cursor.prototype.getPositionNumber = function () {
-    return this.positionNumber;
+    if(this.positionNumber > 0) return this.positionNumber;
+    else return 1;
 };
 
 Cursor.prototype.shader = function () {
