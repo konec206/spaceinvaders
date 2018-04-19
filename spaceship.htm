@@ -495,7 +495,15 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 // dessin du background (utilise la texture dessinée précédemment)
                 drawBackground();
 
-                drawOptionsCursor();
+                // Si c'est un nombre pair on affiche le curseur par défaut
+                if(this.options.cursor.getPositionNumber() % 2 === 0){
+                    drawOptionsCursor('right');
+                }
+                // Sinon, on affiche le curseur dans la direction opposée
+                else{
+                    drawOptionsCursor('left');
+                }
+
                 drawOptions();
             }
             // Si la partie n'a pas démarré, on affiche le menu principal
@@ -555,10 +563,16 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             options.draw();
         }
 
-        function drawOptionsCursor() {
+        function drawOptionsCursor(direction) {
             gl.useProgram(options.cursor.shader());
             gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-            gl.bindTexture(gl.TEXTURE_2D, cursorTexture); // on place maTexture dans l'unité active
+            if(direction === 'left'){
+                gl.bindTexture(gl.TEXTURE_2D, cursorTexture); // on place maTexture dans l'unité active
+            }
+            else {
+                gl.bindTexture(gl.TEXTURE_2D, cursorLeftTexture); // on place maTexture dans l'unité active
+            }
+
             gl.uniform1i(options.cursor.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
 
             options.cursor.sendUniformVariables();
@@ -773,7 +787,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
                 // Flèche du bas
                 if (currentlyPressedKeys[40]) {
-                    if (entry <= this.options.cursor.getNbLines() * 10) {
+                    if (choice === 1 || (entry <= (this.options.cursor.getNbLines()-1) * 10)) {
                         entry = entry + 10;
                         line++;
                         this.options.cursor.setPositionNumber("Options", entry);
