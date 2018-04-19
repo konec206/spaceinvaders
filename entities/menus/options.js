@@ -82,6 +82,9 @@ Options.prototype.setParameters = function(elapsed) {
 
 Options.prototype.setSounds = function(value){
     this.sounds = value;
+    if(value) document.getElementById('stats_sounds').innerHTML = 'ON';
+    else document.getElementById('stats_sounds').innerHTML = 'OFF';
+    console.log(value);
 };
 
 Options.prototype.isSoundEnabled = function() {
@@ -90,6 +93,8 @@ Options.prototype.isSoundEnabled = function() {
 
 Options.prototype.setLevel = function(newLevel){
     this.level = newLevel;
+    if(newLevel === 1) document.getElementById('stats_level').innerHTML = 'EASY';
+    else if(newLevel === 2)document.getElementById('stats_level').innerHTML = 'HARD';
 };
 
 Options.prototype.getLevel = function(){
@@ -102,6 +107,7 @@ Options.prototype.getSkin = function() {
 
 Options.prototype.setSkin = function(skinNumber) {
     this.skin = skinNumber;
+    document.getElementById('stats_skin').src = 'images/spaceship/' + skinNumber  + '.png';
 };
 
 Options.prototype.setPosition = function(x,y) {

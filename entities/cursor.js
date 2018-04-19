@@ -138,13 +138,10 @@ Cursor.prototype.setPositionNumber = function (menuType, nb) {
 
         //Troisième ligne (Skin)
         else if (this.getPositionNumber() === 31) {
-            this.setPosition(-0.3, -0.45);
+            this.setPosition(-0.15, -0.33);
         }
         else if (this.getPositionNumber() === 32) {
-            this.setPosition(-0.0, -0.45);
-        }
-        else if (this.getPositionNumber() === 33) {
-            this.setPosition(0.2, -0.45);
+            this.setPosition(0.85, -0.33);
         }
 
         //Quatrième ligne (Save)
