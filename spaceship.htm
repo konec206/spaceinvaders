@@ -883,12 +883,19 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 //------ DÉPLACEMENTS A L'INTERIEUR DU MENU -----//
                 // Flèche du bas
                 if (currentlyPressedKeys[40]) {
-                    if ((line < 4 && choice === 1) || (optionsEntry <= (this.options.getCursor().getNbLines() - 1) * 10)) {
-                        optionsEntry = optionsEntry + 10;
+                    if (optionsEntry <= this.options.getCursor().getNbLines() * 10) {
+                        if(line === this.options.getCursor().getNbLines() - 1 && choice === 2){
+                            optionsEntry = optionsEntry + 9;
+                        }
+                        else{
+                            optionsEntry = optionsEntry + 10;
+                        }
+
                         line++;
                         this.options.getCursor().setPositionNumber("Options", optionsEntry);
                         drawScene();
                         wait(130); //On évite que l'action se déclenche plusieurs fois
+
                     }
                 }
 
@@ -955,12 +962,13 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     }
                     else if (optionsEntry === 31) {
                         this.options.setSkin(1);
-                        initAllTextures(1);
+                        spaceshipTexture = initTexture('images/spaceship/1.png');
                         wait(130);
                     }
                     else if (optionsEntry === 32) {
                         this.options.setSkin(2);
-                        initAllTextures(2);
+                        spaceshipTexture = initTexture('images/spaceship/2.png');
+                        wait(130);
                     }
                     // Save
                     else if (optionsEntry === 41) {
@@ -1345,9 +1353,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
-        function initAllTextures(spaceship_skin){
+        function initAllTextures(){
             // Entités
-            spaceshipTexture = initTexture("images/spaceship/" + spaceship_skin + '.png');
+            spaceshipTexture = initTexture("images/spaceship/1.png");
             bulletTexture = initTexture("images/final_sprites.png");
             ennemyBulletTexture = initTexture("images/others/ennemy_ammo.png");
             greenEnnemyTexture = initTexture("images/final_sprites.png");
@@ -1394,7 +1402,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
 
             // Initialisation des textures
-            initAllTextures(1);
+            initAllTextures();
 
             // init de tous les objets fixes
             heightfield = new Heightfield();
