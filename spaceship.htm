@@ -1304,14 +1304,21 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
-        var ennemyFireDelay = 60; // Compteur afin de gérer la fréquence des tirs
+        var ennemyFireDelay = 40; // Compteur afin de gérer la fréquence des tirs ennemis
         function ennemyFire(ennemy) {
             if (ennemyFireDelay > 0) ennemyFireDelay--;
             else {
                 ennemyBullet = new EnnemyBullet();
                 ennemyBullet.setPosition(ennemy.position[0], ennemy.position[1] - 0.1);
                 ennemyBullets.push(ennemyBullet);
-                ennemyFireDelay = 50;
+                if(this.options.getLevel() === 1){
+                    // Facile
+                    ennemyFireDelay = 80;
+                }
+                else{
+                    // Difficile
+                    ennemyFireDelay = 60;
+                }
             }
         }
 
@@ -1349,7 +1356,14 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 }
 
                 ennemySpawnDelay = ennemySpawnDelay = 50 - (nbSpawnedEnnemies * 0.15);
-                if (ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
+                if(this.options.getLevel() === 1){
+                    // Facile
+                    if (ennemySpawnDelay <= 25) ennemySpawnDelay = 35;
+                }
+                else{
+                    // Difficile
+                    if (ennemySpawnDelay <= 25) ennemySpawnDelay = 25;
+                }
             }
         }
 
