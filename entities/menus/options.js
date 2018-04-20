@@ -101,14 +101,14 @@ Options.prototype.getLevel = function(){
     return this.level;
 };
 
-Options.prototype.getSkin = function() {
-    return this.skin;
-};
-
 Options.prototype.setSkin = function(skinNumber) {
     this.skin = skinNumber;
     document.getElementById('stats_skin').src = 'images/spaceship/' + skinNumber  + '.png';
 };
+
+Options.prototype.getSkin = function(){
+    return this.skin;
+}
 
 Options.prototype.setPosition = function(x,y) {
     this.position = [x,y];
