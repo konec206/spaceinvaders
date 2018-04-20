@@ -46,10 +46,10 @@ function Spaceship() {
 	this.coordBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
 	var coords = [
-        0.4, 0.225,
-        0.5, 0.225,
-        0.5, 0.425,
-        0.4, 0.425
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
 	];
 
     gl.enable(gl.BLEND);

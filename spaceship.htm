@@ -732,7 +732,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     green_ennemies.splice(green_ennemies.indexOf(green_ennemies[i]), 1);
 
                     // On joue un son d'explosion si l'option est activée
-                    if(this.game.options.isSoundEnabled()){
+                    if(this.options.isSoundEnabled()){
                         var sound_played = false;
                         var a = 0;
                         while (sound_played === false && a < bullet_contact_sounds.length) {
@@ -766,7 +766,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     yellow_ennemies.splice(yellow_ennemies.indexOf(yellow_ennemies[i]), 1);
 
                     // On joue un son d'explosion si l'option des sons est activée
-                    if(this.game.options.isSoundEnabled()){
+                    if(this.options.isSoundEnabled()){
                         var sound_played = false;
                         var a = 0;
                         while (sound_played === false && a < bullet_contact_sounds.length) {
@@ -955,10 +955,12 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                     }
                     else if (optionsEntry === 31) {
                         this.options.setSkin(1);
+                        initAllTextures(1);
                         wait(130);
                     }
                     else if (optionsEntry === 32) {
                         this.options.setSkin(2);
+                        initAllTextures(2);
                     }
                     // Save
                     else if (optionsEntry === 41) {
@@ -1320,6 +1322,24 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
+        function initAllTextures(spaceship_skin){
+            // Entités
+            spaceshipTexture = initTexture("images/spaceship/" + spaceship_skin + '.png');
+            bulletTexture = initTexture("images/final_sprites.png");
+            ennemyBulletTexture = initTexture("images/others/ennemy_ammo.png");
+            greenEnnemyTexture = initTexture("images/final_sprites.png");
+            yellowEnnemyTexture = initTexture("images/ennemies/yellow_red.png");
+
+            // Main Menu
+            mainMenuTexture = initTexture("images/menu/main_menu.png");
+
+            // Game Menu
+            menuTexture = initTexture("images/menu/menu.png");
+            optionsTexture = initTexture("images/menu/options.png");
+            cursorTexture = initTexture("images/menu/cursor.png");
+            cursorLeftTexture = initTexture("images/menu/cursor_left.png");
+        }
+
 
         function webGLStart() {
             // initialisation du canvas et des objets OpenGL
@@ -1350,21 +1370,8 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 bullet_contact_sounds[i].volume = 0.2;
             }
 
-            // Entités
-            spaceshipTexture = initTexture("images/final_sprites.png");
-            bulletTexture = initTexture("images/final_sprites.png");
-            ennemyBulletTexture = initTexture("images/others/ennemy_ammo.png");
-            greenEnnemyTexture = initTexture("images/final_sprites.png");
-            yellowEnnemyTexture = initTexture("images/ennemies/yellow_red.png");
-
-            // Main Menu
-            mainMenuTexture = initTexture("images/menu/main_menu.png");
-
-            // Game Menu
-            menuTexture = initTexture("images/menu/menu.png");
-            optionsTexture = initTexture("images/menu/options.png");
-            cursorTexture = initTexture("images/menu/cursor.png");
-            cursorLeftTexture = initTexture("images/menu/cursor_left.png");
+            // Initialisation des textures
+            initAllTextures(1);
 
             // init de tous les objets fixes
             heightfield = new Heightfield();

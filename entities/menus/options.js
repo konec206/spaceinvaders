@@ -84,7 +84,6 @@ Options.prototype.setSounds = function(value){
     this.sounds = value;
     if(value) document.getElementById('stats_sounds').innerHTML = 'ON';
     else document.getElementById('stats_sounds').innerHTML = 'OFF';
-    console.log(value);
 };
 
 Options.prototype.isSoundEnabled = function() {
