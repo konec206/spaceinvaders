@@ -1079,7 +1079,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
         function animateEnnemyBullets(elapsed) {
             for (var i = 0; i < ennemyBullets.length; i++) {
-                ennemyBullets[i].setPosition(ennemyBullets[i].position[0], ennemyBullets[i].position[1] + 0.025);
+                ennemyBullets[i].setPosition(ennemyBullets[i].position[0], ennemyBullets[i].position[1] - 0.025);
                 ennemyBullets[i].setParameters(elapsed);
             }
         }
@@ -1256,9 +1256,33 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
+        // Collisions entre les projectiles ennemis et le vaisseau
+        function checkEnnemyBulletsCollisions(){
+            // Pour chaque projectile
+            for (var i = 0; i < ennemyBullets.length; i++) {
+                var bulletX = ennemyBullets[i].position[0];
+                var bulletY = ennemyBullets[i].position[1];
+
+                var spaceshipX;
+                var spaceshipY;
+
+                spaceshipX = spaceship.position[0];
+                spaceshipY = spaceship.position[1];
+
+                // Si le projectile est suffisamment proche du vaisseau, il lui inflige des dégâts
+                if (bulletX - spaceshipX < 0.15 && bulletX - spaceshipX > -0.15 && bulletY - spaceshipY < 0.1 && bulletY - spaceshipY > -0.1) {
+                    spaceship.setHp(spaceship.getHp() - 1);
+
+                    // Le projectile est détruit
+                    ennemyBullets.splice(ennemyBullets.indexOf(ennemyBullets[i]), 1);
+                }
+            }
+        }
+
         function checkCollisions() {
             checkBulletsCollisions();
             checkSpaceShipCollisions();
+            checkEnnemyBulletsCollisions();
         }
 
         var fireDelay = 225; // Compteur afin de gérer la fréquence des tirs
@@ -1272,15 +1296,14 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             }
         }
 
-        var ennemyFireDelay = 100; // Compteur afin de gérer la fréquence des tirs
+        var ennemyFireDelay = 60; // Compteur afin de gérer la fréquence des tirs
         function ennemyFire(ennemy) {
             if (ennemyFireDelay > 0) ennemyFireDelay--;
             else {
-                ennemyBullet = new Bullet();
+                ennemyBullet = new EnnemyBullet();
                 ennemyBullet.setPosition(ennemy.position[0], ennemy.position[1] - 0.1);
                 ennemyBullets.push(ennemyBullet);
-                ennemyFireDelay = 60;
-                console.log('new ennemy fire');
+                ennemyFireDelay = 50;
             }
         }
 
@@ -1379,7 +1402,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
             spaceship = new Spaceship();
             bullet = new Bullet();
-            ennemyBullet = new Bullet();
+            ennemyBullet = new EnnemyBullet();
             green_ennemy = new Green_Ennemy();
             yellow_ennemy = new Yellow_Ennemy();
             ennemyTypes = [green_ennemy, yellow_ennemy];

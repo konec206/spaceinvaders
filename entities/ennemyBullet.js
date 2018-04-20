@@ -19,7 +19,7 @@ function initEnnemyBulletShader() {
     ennemyBulletShader.maTextureUniform = gl.getUniformLocation(ennemyBulletShader, "uMaTexture");
 }
 
-function Bullet() {
+function EnnemyBullet() {
     this.initParameters();
 
     // cree un nouveau buffer sur le GPU et l'active
@@ -46,10 +46,10 @@ function Bullet() {
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-        0.405, 0.1,
-        0.505, 0.1,
-        0.505, 0.225,
-        0.405, 0.225
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
     ];
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -65,30 +65,30 @@ function Bullet() {
     this.triangles.numItems = 6;
 }
 
-Bullet.prototype.initParameters = function() {
+EnnemyBullet.prototype.initParameters = function() {
     this.width = 0.2;
     this.height = 0.2;
     this.position = [0.0,-0.7];
 }
 
-Bullet.prototype.setParameters = function(elapsed) {
+EnnemyBullet.prototype.setParameters = function(elapsed) {
     // on pourrait animer des choses ici
 
 }
 
-Bullet.prototype.setPosition = function(x,y) {
+EnnemyBullet.prototype.setPosition = function(x,y) {
     this.position = [x,y];
 }
 
-Bullet.prototype.shader = function() {
+EnnemyBullet.prototype.shader = function() {
     return ennemyBulletShader;
 }
 
-Bullet.prototype.sendUniformVariables = function() {
+EnnemyBullet.prototype.sendUniformVariables = function() {
     gl.uniform2fv(ennemyBulletShader.positionUniform,this.position);
 }
 
-Bullet.prototype.draw = function() {
+EnnemyBullet.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.vertexAttribPointer(ennemyBulletShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
