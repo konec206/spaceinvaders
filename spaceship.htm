@@ -18,6 +18,7 @@
     <script type="text/javascript" src="entities/menus/mainMenu.js"></script>
     <script type="text/javascript" src="entities/menus/menu.js"></script>
     <script type="text/javascript" src="entities/menus/options.js"></script>
+    <script type="text/javascript" src="entities/menus/gameOver.js"></script>
     <script type="text/javascript" src="entities/cursor.js"></script>
 
 
@@ -397,6 +398,36 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 }
     </script>
 
+    <script id="gameOver-vs" type="x-shader/x-vertex">
+// *** le vertex shader ***
+attribute vec3 aVertexPosition; // la position du sommet
+attribute vec2 aVertexCoord; // sa coordonnee de texture
+
+uniform vec2 uPosition; // position de la munition
+varying vec2 vTextureCoord; // on souhaite rasteriser la coordonnee
+
+void main(void) {
+// projection de la position
+gl_Position = vec4(aVertexPosition+vec3(uPosition,0.0), 1.0);
+
+// stockage de la coordonnee de texture
+vTextureCoord = aVertexCoord;
+}
+    </script>
+    <script id="gameOver-fs" type="x-shader/x-fragment">
+// *** le fragment shader ***
+precision highp float; // precision des nombres flottant
+
+varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+
+uniform sampler2D uMaTexture; // la texture en entree
+
+void main(void) {
+// couleur par défaut des munitions
+gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+}
+    </script>
+
     <script id="cursor-vs" type="x-shader/x-vertex">
 // *** le vertex shader ***
 attribute vec3 aVertexPosition; // la position du sommet
@@ -479,6 +510,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
         var options;
         var optionsTexture;
 
+        var gameOver;
+        var gameOverTexture;
+
 
         //----- ENTITÉS -----//
         var spaceship; // l'objet spaceship, sa géométrie, son shader
@@ -516,8 +550,17 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // active le FBO (a partie de la, on dessine dans la texture associée)
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.id());
 
+            // La partie est terminée
+            if(game.isEnded()){
+                // désactivation du FBO (on dessine sur l'ecran maintenant)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+                drawBackground();
+
+                drawGameOver();
+            }
             // On est dans les options
-            if (game.isOptions()) {
+            else if (game.isOptions()) {
                 // désactivation du FBO (on dessine sur l'ecran maintenant)
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -593,6 +636,16 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
             options.sendUniformVariables();
             options.draw();
+        }
+
+        function drawGameOver(){
+            gl.useProgram(gameOver.shader());
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, gameOverTexture);
+            gl.uniform1i(gameOver.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+
+            gameOver.sendUniformVariables();
+            gameOver.draw();
         }
 
         function drawOptionsCursor(direction) {
@@ -826,6 +879,22 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             spaceship = new Spaceship();
         }
 
+        function restartGame() {
+            this.game.initParameters();
+            this.game.startGame();
+
+            this.mainMenu = new MainMenu();
+            this.mainMenu.setCursor(new Cursor(4, 'MainMenu'));
+
+            this.menu = new Menu();
+            this.menu.setCursor(new Cursor(3, 'Menu'));
+
+            green_ennemies = [];
+            yellow_ennemies = [];
+            bullets = [];
+            spaceship = new Spaceship();
+        }
+
         function handleKeys() {
 
             // On est dans le menu principal
@@ -978,6 +1047,17 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                         }
                         wait(130);
                     }
+                }
+            }
+            // Game Over
+            else if(this.game.isEnded()){
+                // Espace
+                if (currentlyPressedKeys[32]){
+                    restartGame();
+                }
+                // Echap
+                else if(currentlyPressedKeys[27]){
+                    resetGame();
                 }
             }
             else {
@@ -1157,7 +1237,9 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
                 handleKeys();
             }
             else if (gameStatus === "Ended") {
-
+                // Display game over screen
+                requestAnimFrame(tick);
+                handleKeys();
             }
         }
 
@@ -1381,6 +1463,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             // Game Menu
             menuTexture = initTexture("images/menu/menu.png");
             optionsTexture = initTexture("images/menu/options.png");
+            gameOverTexture = initTexture("images/menu/game_over.png");
             cursorTexture = initTexture("images/menu/cursor.png");
             cursorLeftTexture = initTexture("images/menu/cursor_left.png");
         }
@@ -1407,6 +1490,7 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
             initMainMenuShader();
             initMenuShader();
             initOptionsShader();
+            initGameOverShader();
             initCursorShader();
 
             // init de tous les sons
@@ -1439,6 +1523,8 @@ gl_FragColor = texture2D(uMaTexture,vTextureCoord);
 
             options = new Options();
             options.setCursor(new Cursor(4, "Options"));
+
+            gameOver = new GameOver();
 
             // la couleur de fond sera noire
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
